@@ -19,5 +19,5 @@ HEADERS  += mainwindow.h
 
 FORMS    += mainwindow.ui
 
-CONFIG += link_pkgconfig
-PKGCONFIG += swipl
+
+RESOURCES += images.qrc
