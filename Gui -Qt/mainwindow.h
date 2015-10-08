@@ -23,6 +23,7 @@ public:
 private:
     void MainWindow::drawPiece(int x,int y,std::string color);
     void MainWindow::clearCell(int x,int y);
+    void MainWindow::initBoard();
     QTableWidget* tableWidget;
     QPushButton* move;
     Ui::MainWindow* ui;
