@@ -2,9 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QTableWidget>
 #include <QPushButton>
-#include <string>
+#include "board.h"
 
 namespace Ui {
 class MainWindow;
@@ -17,19 +16,13 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    void MainWindow::UpdateTable(int x,int y);
-    void MainWindow::Paint();
 
 private:
-    void MainWindow::drawPiece(int x,int y,std::string color);
-    void MainWindow::clearCell(int x,int y);
-    void MainWindow::initBoard();
-    QTableWidget* tableWidget;
-    QPushButton* move;
-    Ui::MainWindow* ui;
+    QPushButton* choose;
+    Board* board;
     int sizeTable;
 private slots:
-     void handleButtonMove();
+    void handleButtonChoose();
 };
 
 #endif // MAINWINDOW_H
