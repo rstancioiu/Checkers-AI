@@ -12,11 +12,11 @@
 #include <QImage>
 #include <QFile>
 
-Board::Board(QWidget *parent) :
-    QMainWindow(parent)
+Board::Board(QString white,QString black) :
+    QMainWindow(0)
 {
     sizeTable=10;
-    QFile qss(":/stylesheets/default.qss");
+    QFile qss(":/stylesheets/board.qss");
     qss.open(QFile::ReadOnly);
     this->setStyleSheet(qss.readAll());
     qss.close();
@@ -25,7 +25,7 @@ Board::Board(QWidget *parent) :
 
 void Board::Paint()
 {
-    this->resize(600,500);
+    this->resize(600,600);
     initBoard();
     move = new QPushButton("Move",this);
     move->setFont(QFont("red"));

@@ -1,0 +1,34 @@
+QMainWindow{
+    background-color: #ffffff;
+}
+
+QPushButton{
+        border: 1px solid #6593cf;
+        border-radius: 2px;
+        padding: 5px 15px 2px 5px;
+        background: qlineargradient(x1 : 0, y1 : 0, x2 : 0, y2 :   1, stop :   0.0 #f5f9ff,
+                stop :   0.5 #c7dfff, stop :   0.55 #afd2ff, stop :   1.0 #c0dbff);
+        color: #006aff;
+        font: bold large "Arial";
+        height: 30px;
+}
+
+QPushButton:hover {
+        color:#000;
+        font-size:1em;
+        border:1px solid #eee;
+        background:#eee;
+        border-radius:4px;
+        line-height:2em;
+        border:1px solid #aaa;
+        text-decoration:none;
+
+}
+
+
+QTextEdit{
+        font-family:'MS Shell Dlg 2';
+        font-size: 16.25pt;
+        font-weight:400;
+        font-style:italic;
+}

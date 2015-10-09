@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QTableWidget>
 #include <QPushButton>
+#include <QSignalMapper>
 #include <string>
 
 class Board : public QMainWindow
@@ -11,7 +12,7 @@ class Board : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit Board(QWidget *parent = 0);
+    explicit Board(QString white, QString black);
     ~Board();
     void Board::Paint();
 

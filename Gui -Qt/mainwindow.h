@@ -3,6 +3,9 @@
 
 #include <QMainWindow>
 #include <QPushButton>
+#include <QTextEdit>
+#include <algorithm>
+#include <string>
 #include "board.h"
 
 namespace Ui {
@@ -18,11 +21,18 @@ public:
     ~MainWindow();
 
 private:
-    QPushButton* choose;
+    void initButtons();
+    void paint();
+    QPushButton* start;
+    QPushButton* left[3];
+    QPushButton* right[3];
+    QTextEdit* center[3];
     Board* board;
+    QSignalMapper mapper;
     int sizeTable;
 private slots:
-    void handleButtonChoose();
+    void handleButtonStart();
+    void handleButton(int x);
 };
 
 #endif // MAINWINDOW_H

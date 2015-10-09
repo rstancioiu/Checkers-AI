@@ -2,6 +2,8 @@
     <qresource prefix="/">
         <file>images/black.png</file>
         <file>images/white.png</file>
-        <file>stylesheets/default.qss</file>
+        <file>images/test.png</file>
+        <file>stylesheets/mainwindow.qss</file>
+        <file>stylesheets/board.qss</file>
     </qresource>
 </RCC>
