@@ -6,6 +6,9 @@ damierMilieu(X,Y):- member(X,[3,5,7]),member(Y,[3,5,7]).
 %coup noir coup blanc pour stopper
 %attention la dame est bloquée par une diagonale de 2 noirs ou plus
 %faire bouffer les dames blanches puis implémenter les dames pour les noirs
+%attention, mettre une récursivité pour la dame elle doit verifier qu'elle ne peut pas bouffer plus de pions en plusieurs coups
+% => est ce qu'on enregistre le nombre de possibilités ? ou trop dur ? -> pas pour l'instant
+
 
 %--INITIALISATION DES PIONS--
 :- dynamic(posBlanc/1).
@@ -50,6 +53,7 @@ aleaBlancPasBouffer(X2,Y2,X,Y):- dameBlanche(X,Y),not(damierMilieu(X,Y)),member(
 aleaBlancPasBouffer(X2,Y2,X,Y):- dameBlanche(X,Y),not(damierMilieu(X,Y)),member(Xi,[-8,-7,-6,-5,-4,-3]),(Xi = -Yi),X2 is X + Xi, Y2 is Y + Yi,damierMilieu(X2,Y2),Xa is X-1,Ya is Y+1,between(X2,Xa,Xocc),between(Ya,Y2,Yocc),not(caseOccupee(Xocc,Yocc)),!.
 aleaBlancPasBouffer(X2,Y2,X,Y):- dameBlanche(X,Y),not(damierMilieu(X,Y)),member(Xi,[3,4,5,6,7,8]),(Xi = -Yi),X2 is X + Xi, Y2 is Y + Yi,damierMilieu(X2,Y2),Xa is X+1,Ya is Y-1,between(Xa,X2,Xocc),between(Y2,Ya,Yocc),not(caseOccupee(Xocc,Yocc)),!.
 aleaBlancPasBouffer(X2,Y2,X,Y):- dameBlanche(X,Y),not(damierMilieu(X,Y)),member(Xi,[3,4,5,6,7,8]),(Xi = Yi),X2 is X + Xi, Y2 is Y + Yi,damierMilieu(X2,Y2),Xa is X+1,Ya is Y+1,between(Xa,X2,Xocc),between(Ya,Y2,Yocc),not(caseOccupee(Xocc,Yocc)),!.
+
 %aleaBlancBouffer(X2,Y2,X,Y):- Xi is 1,Xi2 is Xi + Xi,dameBlanche(X,Y),Xn is X + Xi, Yn is Y + 1,caseNoire(Xn,Yn),Y2 is Y + 2,X2 is X + Xi2,damier(X2,Y2),not(caseOccupee(X2,Y2)),supprimeNoir(Xn,Yn),!.
 %aleaBlancBouffer(X2,Y2,X,Y):- Xi is -1,Xi2 is Xi + Xi,dameBlanche(X,Y),Xn is X + Xi, Yn is Y + 1,caseNoire(Xn,Yn),Y2 is Y + 2,X2 is X + Xi2,damier(X2,Y2),not(caseOccupee(X2,Y2)),supprimeNoir(Xn,Yn),!.
 %aleaBlancBouffer(X2,Y2,X,Y):- Xi is 1,Xi2 is Xi + Xi,dameBlanche(X,Y),Xn is X + Xi, Yn is Y - 1,caseNoire(Xn,Yn),Y2 is Y - 2,X2 is X + Xi2,damier(X2,Y2),not(caseOccupee(X2,Y2)),supprimeNoir(Xn,Yn),!.
