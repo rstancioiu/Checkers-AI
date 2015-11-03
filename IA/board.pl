@@ -89,7 +89,6 @@ make_move(B,MOVE,NEWB,C) :-
 		nth0(0,MOVE,X),
 		nth0(1,MOVE,Y)
 	),
-	write(MOVE),nl,
 	nth0(2,MOVE,POS),
 	nth0(3,MOVE,KILLED),
 	length(KILLED,NB),
@@ -172,7 +171,7 @@ is_legal_eat(B,OLDX,OLDY,X,Y,DMAX,EX,EY) :-
 	get2D(B,EX,EY,TVAL),
 	TVAL>0,
   	AVG is (OLDVAL+TVAL)/2,
-	float_fractional_part(AVG)>0,!.
+	float_fractional_part(AVG)>0.
 	
 %basic eat queen
 is_legal_eat(B,OLDX,OLDY,X,Y,DMAX,EX,EY) :-
@@ -209,6 +208,12 @@ possible(B,P,OLDX,OLDY,L1,L2,0) :-
 possible(B,P,OLDX,OLDY,L1,L2,CURSOR) :-
 	possible_eat(B,P,OLDX,OLDY,L1,L2,CURSOR).
 
+%End condition
+possible_eat(_,_,_,_,L1,L2,C) :-
+	C>0,
+	length(L1,C),
+	length(L2,C),!.
+
 possible_eat(B,P,OLDX,OLDY,L1,L2,CURSOR) :-
 	get2D(B,OLDX,OLDY,VAL),
 	VAL>0,
@@ -231,17 +236,17 @@ possible_eat(B,P,OLDX,OLDY,L1,L2,CURSOR) :-
 	eat(B,OLDX,OLDY,X,Y,EX,EY,NEWB),
 	possible_eat(NEWB,P,X,Y,L1,L2,CURSOR2).
 
-%End condition
-possible_eat(_,_,_,_,L1,L2,C) :-
-	C>0,
-	length(L1,C),
-	length(L2,C).
-
 %Random member polyfill
 rand_member(A, LIST) :-
 	length(LIST, LEN),
 	X is random(LEN),
 	nth0(X, LIST, A).
+
+%End condition
+max_kills(MOVES,MAX,C,FINALMAX) :-
+	C>0,
+	length(MOVES,C),
+	FINALMAX=MAX,!.
 
 %Get number of kills
 max_kills(MOVES,MAX,C,FINALMAX) :-
@@ -250,13 +255,7 @@ max_kills(MOVES,MAX,C,FINALMAX) :-
 	length(KILLS,L),
 	NEWMAX is max(MAX,L),
 	NEWC is C+1,
-	max_kills(MOVES,NEWMAX,NEWC,FINALMAX),!.
-
-%End condition
-max_kills(MOVES,MAX,C,FINALMAX) :-
-	C>0,
-	length(MOVES,C),
-	FINALMAX=MAX.
+	max_kills(MOVES,NEWMAX,NEWC,FINALMAX).
 
 %Check if a move contains enough kills to be legal
 is_max_kills(M,LMOVES,MAX) :-
@@ -292,17 +291,17 @@ display_all_moves(P,MOVE) :-
 	board(B),
 	findall([PX,PY,L1,L2],possible(B,P,PX,PY,L1,L2,0),LMOVES),
 	select_kills(LMOVES,MOVES),
-	nth0(X,MOVES,MOVE).
+	member(MOVE,MOVES).
 
-user_move(A,SX,SY, EX, EY, LIST,C)  :-
+user_move(_,_,_,_,_,LIST,C)  :-
 	C>0,
 	length(LIST,C),!.
 
-user_move(A,SX,SY, EX, EY, LIST,C) :-
-	nth0(C, LIST, MOVE),
+user_move(A,SX,SY,EX,EY,LIST,C) :-
+	nth0(C,LIST,MOVE),
 	nth0(0,MOVE,SXP),
 	nth0(1,MOVE,SYP),
-	nth0(2,MOVE, L1),
+	nth0(2,MOVE,L1),
 	length(L1,LENP),
 	LENP1 is LENP-1,
 	nth0(LENP1,L1,D),
@@ -311,7 +310,7 @@ user_move(A,SX,SY, EX, EY, LIST,C) :-
 	( (SX==SXP,SY==SYP,EX==EXP,EY==EYP) -> 
 		A=MOVE,!;
 		C1 is C+1,
-	user_move(A,SX,SY, EX, EY, LIST,C1),!
+	user_move(A,SX,SY,EX,EY,LIST,C1),!
 	).
 
 make_user_move(P,SX,SY,EX,EY) :-
@@ -336,21 +335,23 @@ owned_by(B,P,X,Y) :-
 	TMP==P.
 
 evaluate(B,P,E) :-
-	write('Evaluating board with params : '),
-	write(B),write('  -  '),write(P),write(' = '),
 	findall([X,Y],owned_by(B,P,X,Y),L),
 	OTHERP is 1-P,
 	findall([X,Y],owned_by(B,OTHERP,X,Y),L2),
 	length(L,NBP),
 	length(L2,NBOP),
-	E is (NBP+(20-NBOP)),
-	write(E),nl.
+	E is (NBP+(20-NBOP)).
+
+%End condition
+ia_max(_,MOVES,_,_,_,E,_,_,CURSOR,ECUR) :-
+	CURSOR>0,
+	length(MOVES,CURSOR),
+	E=ECUR.
 
 ia_max(B,MOVES,P,DEPTH,Dinit,E,MOVEMAX,Pinit,CURSOR,ECUR) :-
-	write('----- LOOP MAX START ----'),nl,
 	nth0(CURSOR,MOVES,MOVE),
 	make_move(B,MOVE,B2,0),
-	minimax(B2,MOV,DEPTH,Dinit,E2,P,Pinit),
+	minimax(B2,_,DEPTH,Dinit,E2,P,Pinit),
 	(E2 > ECUR ->
 		NEWMAX is E2,
 		MOVEMAX=MOVE
@@ -358,20 +359,18 @@ ia_max(B,MOVES,P,DEPTH,Dinit,E,MOVEMAX,Pinit,CURSOR,ECUR) :-
 		NEWMAX is ECUR
 	),
 	NEWC is CURSOR+1,
-	ia_max(B,MOVES,P,DEPTH,Dinit,E,MOVEMAX,Pinit,NEWC,NEWMAX),!.
+	ia_max(B,MOVES,P,DEPTH,Dinit,E,MOVEMAX,Pinit,NEWC,NEWMAX).
 
 %End condition
-ia_max(B,MOVES,P,DEPTH,Dinit,E,MOVEMAX,Pinit,CURSOR,ECUR) :-
+ia_min(_,MOVES,_,_,_,E,_,_,CURSOR,ECUR) :-
 	CURSOR>0,
 	length(MOVES,CURSOR),
-	E=ECUR,
-	write('----- LOOP MAX END ----'),nl.
+	E=ECUR.
 
 ia_min(B,MOVES,P,DEPTH,Dinit,E,MOVEMIN,Pinit,CURSOR,ECUR) :-
-	write('----- LOOP MIN START ----'),nl,
 	nth0(CURSOR,MOVES,MOVE),
 	make_move(B,MOVE,B2,0),
-	minimax(B2,MOV,DEPTH,Dinit,E2,P,Pinit),
+	minimax(B2,_,DEPTH,Dinit,E2,P,Pinit),
 	(E2 < ECUR ->
 		NEWMIN is E2,
 		MOVEMIN=MOVE
@@ -379,14 +378,7 @@ ia_min(B,MOVES,P,DEPTH,Dinit,E,MOVEMIN,Pinit,CURSOR,ECUR) :-
 		NEWMIN is ECUR
 	),
 	NEWC is CURSOR+1,
-	ia_min(B,MOVES,P,DEPTH,Dinit,E,MOVEMIN,Pinit,NEWC,NEWMIN),!.
-
-%End condition
-ia_min(B,MOVES,P,DEPTH,Dinit,E,MOVEMIN,Pinit,CURSOR,ECUR) :-
-	CURSOR>0,
-	length(MOVES,CURSOR),
-	E=ECUR,
-	write('----- LOOP MIN END---- = '),write(E),nl.
+	ia_min(B,MOVES,P,DEPTH,Dinit,E,MOVEMIN,Pinit,NEWC,NEWMIN).
 
 minimax(B,MOV,DEPTH,Dinit,E,P,Pinit):-
 	(DEPTH==0 ->
@@ -394,16 +386,12 @@ minimax(B,MOV,DEPTH,Dinit,E,P,Pinit):-
 		;
 		findall([PX,PY,L1,L2],possible(B,P,PX,PY,L1,L2,0),LMOVES),
 		select_kills(LMOVES,NEWMOVES),
-		write('MOVES AT THIS DEPTH : '),write(NEWMOVES),nl,
 		P2 is 1-P,
 		D2 is DEPTH-1,
-		write('NEW DEPTH REACHED : '),write(D2),nl,
 		(P==Pinit -> 
-			ia_max(B,NEWMOVES,P2,D2,Dinit,E,R,Pinit,0,0),
-			write('Result at this level (max) : '),write(E),nl
+			ia_max(B,NEWMOVES,P2,D2,Dinit,E,R,Pinit,0,0)
 			;
-			ia_min(B,NEWMOVES,P2,D2,Dinit,E,R,Pinit,0,9999),
-			write('Result at this level (min) : '),write(E),nl
+			ia_min(B,NEWMOVES,P2,D2,Dinit,E,R,Pinit,0,9999)
 		),
 		(DEPTH==Dinit ->
 			MOV=R
@@ -414,4 +402,7 @@ minimax(B,MOV,DEPTH,Dinit,E,P,Pinit):-
 
 play_minimax(P,MOVE) :-
 	board(B),
-	minimax(B,MOVE,2,2,0,P,P).
+	minimax(B,MOVE,1,1,_,P,P),
+	make_move(B,MOVE,NEWB,0),
+	retract(board(_)),
+	assert(board(NEWB)),!.
