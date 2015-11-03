@@ -1,21 +1,18 @@
 %Initialize board
 :- dynamic board/1.
-board([[0,2,0,1,0,1,0,1,0,1],
-		[1,0,1,0,1,0,1,0,1,0],
-		[0,1,0,1,0,1,0,1,0,1],
-		[1,0,3,0,1,0,1,0,1,0],
-		[0,0,0,2,0,0,0,0,0,0],
+ board([[0,0,0,0,0,0,0,0,0,0],
 		[0,0,0,0,0,0,0,0,0,0],
-		[0,2,0,0,0,2,0,2,0,2],
-		[2,0,2,0,2,0,0,0,2,0],
-		[0,1,0,2,0,2,0,2,0,2],
-		[1,0,0,0,2,0,2,0,2,0]]).
+		[0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,1,0,0,0,0],
+		[0,0,0,0,1,0,0,0,0,0],
+		[0,0,0,0,0,2,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0]]).
 
 %Show current board state
-game :- 
-	write('********************'),nl,
-	write(' Prolog Checkers    '),nl,
-	write('********************'),nl,
+game :-
 	board(B),
 	show_board(B).
 
@@ -25,11 +22,6 @@ show_board([L1,L2,L3,L4,L5,L6,L7,L8,L9,L10]) :-
 	
 show_line([L1,L2,L3,L4,L5,L6,L7,L8,L9,L10]) :-
 	write(L1),write(L2),write(L3),write(L4),write(L5),write(L6),write(L7),write(L8),write(L9),write(L10).
-
-%Count how many times a predicate P is true
-count(P,Count) :-
-  findall(1,P,L),
-  length(L,Count).
 	
 %set(Array, Indice, New element, New array ?)
 set([_|T], 0, X, [X|T]) :- !.
@@ -48,7 +40,7 @@ set2D(B,X,Y,VAL,B2) :-
 
 %Reminder : how to actually update board
 %	retract(board(_)),
-%	assert(board(B3)),
+%	assert(board(NEWB)),
 
 %Turn pawn into queen
 check_queen(B,X,Y,NEWB) :-
@@ -58,7 +50,7 @@ check_queen(B,X,Y,NEWB) :-
 		set2D(B,X,Y,VAL2,NEWB)
 	;
 	NEWB=B
-	).
+).
 
 move(B,OLDX,OLDY,X,Y,NEWB) :-
 	%Backup old value, and set it to 0
@@ -80,6 +72,42 @@ eat(B,OLDX,OLDY,X,Y,EX,EY,NEWB) :-
 	%Turn into queen if necessary
 	check_queen(B4,X,Y,NEWB).
 
+%End condition
+make_move(B,MOVE,B,C) :-
+	nth0(2,MOVE,POS),
+	C>0,
+	length(POS,C).
+
+%Use a move given by an IA to update the board
+make_move(B,MOVE,NEWB,C) :-
+	(C>0 ->
+		PREVIOUS is C-1,
+		nth0(PREVIOUS,POS,POSTMP),
+		nth0(0,POSTMP,X),
+		nth0(1,POSTMP,Y)
+		;
+		nth0(0,MOVE,X),
+		nth0(1,MOVE,Y)
+	),
+	nth0(2,MOVE,POS),
+	nth0(3,MOVE,KILLED),
+	length(KILLED,NB),
+	nth0(C,POS,POSI),
+	(NB > 0 ->
+		nth0(0,POSI,NEWX),
+		nth0(1,POSI,NEWY),
+		nth0(C,KILLED,KILLEDI),
+		nth0(0,KILLEDI,EX),
+		nth0(1,KILLEDI,EY),
+		eat(B,X,Y,NEWX,NEWY,EX,EY,B2),
+		C2 is C+1,
+		make_move(B2,MOVE,NEWB,C2)
+		;
+		nth0(0,POSI,NEWX),
+		nth0(1,POSI,NEWY),
+		move(B,X,Y,NEWX,NEWY,NEWB)
+	).
+	
 %Check empty path
 empty_path(_,X,Y,X,Y) :- !.
 empty_path(B,OLDX,OLDY,X,Y) :-
@@ -152,13 +180,12 @@ is_legal_eat(B,OLDX,OLDY,X,Y,DMAX,EX,EY) :-
 	get2D(B,OLDX,OLDY,OLDVAL),
 	valid_path(B,OLDX,OLDY,X,Y,EX,EY,OLDVAL).
 
-%list all possible choices for entity @coords OLDX,OLDY
+%POSSIBLE : list all possible choices for entity @coords OLDX,OLDY
 %L1 contains positions and L2 ennemies killed on the path
 %CURSOR is used to browse L1 and L2
 
 %Possible move if it's a legal move and it's the only option of the list
-possible(OLDX,OLDY,L1,L2,0) :-
-	board(B),
+possible(B,P,OLDX,OLDY,L1,L2,0) :-
 	length(L1,1),
 	length(L2,0),
 	get2D(L1,0,0,X),
@@ -167,6 +194,8 @@ possible(OLDX,OLDY,L1,L2,0) :-
 	length(LINE,2),
 	get2D(B,OLDX,OLDY,VAL),
 	VAL>0,
+	TMP is VAL mod 2,
+	TMP==P,
 	(VAL>2 ->
 		DMAX is 10,
 		BACKWARDS is 1;
@@ -176,13 +205,14 @@ possible(OLDX,OLDY,L1,L2,0) :-
 	is_legal_move(B,OLDX,OLDY,X,Y,DMAX,BACKWARDS,0).
 
 %Possible eats if they're all legals and follow each other
-possible(OLDX,OLDY,L1,L2,CURSOR) :-
-	board(B),
-	possible_eat(B,OLDX,OLDY,L1,L2,CURSOR).
+possible(B,P,OLDX,OLDY,L1,L2,CURSOR) :-
+	possible_eat(B,P,OLDX,OLDY,L1,L2,CURSOR).
 
-possible_eat(B,OLDX,OLDY,L1,L2,CURSOR) :-
+possible_eat(B,P,OLDX,OLDY,L1,L2,CURSOR) :-
 	get2D(B,OLDX,OLDY,VAL),
 	VAL>0,
+	TMP is VAL mod 2,
+	TMP==P,
 	(VAL>2 ->
 		DMAX is 10;
 		DMAX is 1
@@ -198,29 +228,148 @@ possible_eat(B,OLDX,OLDY,L1,L2,CURSOR) :-
 	length(LINE2,2),
 	CURSOR2 is CURSOR+1,
 	eat(B,OLDX,OLDY,X,Y,EX,EY,NEWB),
-	possible_eat(NEWB,X,Y,L1,L2,CURSOR2).
+	possible_eat(NEWB,P,X,Y,L1,L2,CURSOR2).
 
 %End condition
-possible_eat(_,_,_,L1,L2,C) :-
+possible_eat(_,_,_,_,L1,L2,C) :-
 	C>0,
 	length(L1,C),
 	length(L2,C).
 
-%Answers yes if entity @coords X,Y is owned by player P
-owned_by(P,X,Y) :-
+%Random member polyfill
+rand_member(A, LIST) :-
+	length(LIST, LEN),
+	X is random(LEN),
+	nth0(X, LIST, A).
+
+%Get number of kills
+max_kills(MOVES,MAX,C,FINALMAX) :-
+	nth0(C, MOVES, M),
+	nth0(3, M, KILLS),
+	length(KILLS,L),
+	NEWMAX is max(MAX,L),
+	NEWC is C+1,
+	max_kills(MOVES,NEWMAX,NEWC,FINALMAX),!.
+
+%End condition
+max_kills(MOVES,MAX,C,FINALMAX) :-
+	C>0,
+	length(MOVES,C),
+	FINALMAX=MAX.
+
+%Check if a move contains enough kills to be legal
+is_max_kills(M,LMOVES,MAX) :-
+	member(M,LMOVES),
+	nth0(3,M,KILLS),
+	length(KILLS,L),
+	L >= MAX.
+
+%Take a list of moves and return only legal moves based on "max kills" rule
+select_kills(LMOVES,NEWMOVES) :-
+	max_kills(LMOVES,0,0,FINALMAX),
+	findall(M,is_max_kills(M,LMOVES,FINALMAX),NEWMOVES).
+
+/** ------------------------------------------------
+-----------------   RANDOM IA ----------------------
+------------------------------------------------  */  
+	
+%Plays random move for player P
+play_random(P,MOVE) :-
 	board(B),
+	findall([PX,PY,L1,L2],possible(B,P,PX,PY,L1,L2,0),LMOVES),
+	select_kills(LMOVES,NEWMOVES),
+	rand_member(MOVE,NEWMOVES),
+	make_move(B,MOVE,NEWB,0),
+	retract(board(_)),
+	assert(board(NEWB)),!.
+
+/** ------------------------------------------------
+-------------------   MIN MAX ----------------------
+------------------------------------------------  */
+
+owned_by(B,P,X,Y) :-
 	get2D(B,X,Y,VAL),
 	VAL>0,
 	TMP is VAL mod 2,
 	TMP==P.
 
-%Plays random move for player P
-play_random(P,POS,MOVE) :-
-	findall([X,Y],owned_by(P,X,Y),L),
-	random_member(POS,L),
-	nth0(0,POS,PX),
-	nth0(1,POS,PY),
-	findall([L1,L2],possible(PX,PY,L1,L2,0),LMOVES),
-	length(LMOVES,LEN),
-	LEN>0,
-	random_member(MOVE,LMOVES).
+evaluate(B,P,E) :-
+	write('Evaluating board with params : '),
+	write(B),write('  -  '),write(P),write(' = '),
+	findall([X,Y],owned_by(B,P,X,Y),L),
+	OTHERP is 1-P,
+	findall([X,Y],owned_by(B,OTHERP,X,Y),L2),
+	length(L,NBP),
+	length(L2,NBOP),
+	E is (NBP+(20-NBOP)),
+	write(E),nl.
+
+ia_max(B,MOVES,P,DEPTH,Dinit,E,MOVEMAX,Pinit,CURSOR,ECUR) :-
+	write('----- LOOP MAX START ----'),nl,
+	nth0(CURSOR,MOVES,MOVE),
+	make_move(B,MOVE,B2,0),
+	minimax(B2,MOV,DEPTH,Dinit,E2,P,Pinit),
+	(E2 > ECUR ->
+		NEWMAX is E2,
+		MOVEMAX=MOVE
+		;
+		NEWMAX is ECUR
+	),
+	NEWC is CURSOR+1,
+	ia_max(B,MOVES,P,DEPTH,Dinit,E,MOVEMAX,Pinit,NEWC,NEWMAX),!.
+
+%End condition
+ia_max(B,MOVES,P,DEPTH,Dinit,E,MOVEMAX,Pinit,CURSOR,ECUR) :-
+	CURSOR>0,
+	length(MOVES,CURSOR),
+	E=ECUR,
+	write('----- LOOP MAX END ----'),nl.
+
+ia_min(B,MOVES,P,DEPTH,Dinit,E,MOVEMIN,Pinit,CURSOR,ECUR) :-
+	write('----- LOOP MIN START ----'),nl,
+	nth0(CURSOR,MOVES,MOVE),
+	make_move(B,MOVE,B2,0),
+	minimax(B2,MOV,DEPTH,Dinit,E2,P,Pinit),
+	(E2 < ECUR ->
+		NEWMIN is E2,
+		MOVEMIN=MOVE
+		;
+		NEWMIN is ECUR
+	),
+	NEWC is CURSOR+1,
+	ia_min(B,MOVES,P,DEPTH,Dinit,E,MOVEMIN,Pinit,NEWC,NEWMIN),!.
+
+%End condition
+ia_min(B,MOVES,P,DEPTH,Dinit,E,MOVEMIN,Pinit,CURSOR,ECUR) :-
+	CURSOR>0,
+	length(MOVES,CURSOR),
+	E=ECUR,
+	write('----- LOOP MIN END---- = '),write(E),nl.
+
+minimax(B,MOV,DEPTH,Dinit,E,P,Pinit):-
+	(DEPTH==0 ->
+		evaluate(B,Pinit,E)
+		;
+		findall([PX,PY,L1,L2],possible(B,P,PX,PY,L1,L2,0),LMOVES),
+		select_kills(LMOVES,NEWMOVES),
+		write('MOVES AT THIS DEPTH : '),write(NEWMOVES),nl,
+		P2 is 1-P,
+		D2 is DEPTH-1,
+		write('NEW DEPTH REACHED : '),write(D2),nl,
+		(P==Pinit -> 
+			ia_max(B,NEWMOVES,P2,D2,Dinit,E,R,Pinit,0,0),
+			write('Result at this level (max) : '),write(E),nl
+			;
+			ia_min(B,NEWMOVES,P2,D2,Dinit,E,R,Pinit,0,9999),
+			write('Result at this level (min) : '),write(E),nl
+		),
+		(DEPTH==Dinit ->
+			MOV=R
+			;
+			true
+		)
+	).
+
+play_minimax(P,MOVE) :-
+	board(B),
+	minimax(B,MOVE,2,2,0,P,P).
