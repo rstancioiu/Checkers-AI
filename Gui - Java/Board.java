@@ -2,6 +2,9 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Point;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,11 +21,17 @@ public class Board extends JFrame {
     private JLabel[] labelsBlack = new JLabel[20];
     private ImageIcon black, white,whitequeen,blackqueen;
     private JPanel canvasBoard;
+    private boolean clicked;
+    private Point start,end;
     Map<Integer, Integer> map = new HashMap<Integer, Integer>();
-    private int[][] table;
+    private int[][] table,pieces;
+    private Game game;
 
-    public Board(int[][] table) {
+    public Board(int[][] table,int [][] pieces, Game game) {
         this.table = table;
+        this.pieces= pieces;
+        this.game=game;
+        clicked=false;
         configure();
         createAndShowGUI(); 
     }
@@ -60,11 +69,46 @@ public class Board extends JFrame {
 
     private void addComponentsToPane() {
         canvasBoard=new CanvasBoard();
+        canvasBoard.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+            }
+            @Override
+            public void mousePressed(MouseEvent e) {
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+            }
+            @Override
+            public void mouseEntered(MouseEvent e) {
+            }
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                Point p = e.getPoint();
+                int x = 40,y = 20,distx = 50,disty = 50;
+                if(clicked){
+                    end=p;
+                    int sx=(int)((start.getX()-x)/distx);
+                    int sy=(int)((-start.getY()+520)/disty);
+                    int ex=(int)((end.getX()-x)/distx);
+                    int ey=(int)((-end.getY()+520)/disty);
+                    System.out.println(sx+" "+sy+" "+ex+" "+ey);
+                    if(sx!=sy || ex!=ey)
+                    game.sendQuery(sx,sy,ex,ey);
+                }
+                else{
+                    start=p;
+                }
+                clicked=!clicked;
+                System.out.println(p.getX() + " "+ p.getY());
+            }
+        });
         getContentPane().add(canvasBoard);
     }
 
-    public void update(int[][] table) {
+    public void update(int[][] pieces,int[][] table) {
         this.table=table;
+        this.pieces=pieces;
         canvasBoard.repaint();
     }
 
@@ -74,32 +118,23 @@ public class Board extends JFrame {
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2d = (Graphics2D) g;
-            int x = 40;
-            int y = 20;
-            int distx = 50;
-            int disty = 50;
-            System.out.println("##############################");
-            System.out.println("##############################");
-            for(int i=0;i<10;++i)
-            {
-                for(int j=0;j<10;++j)
-                    System.out.print(table[i][j]+" ");
-                System.out.print("\n");
-            }
-            for (int i = 0; i < N; ++i) {
-                y = 20;
+            int x = 40,y = 20,distx = 50,disty = 50;
+            for (int i = N-1; i >=0; --i) {
+                x = 40;
                 for (int j = 0; j < N; ++j) {
-                    if ((i + j) % 2 == 0) {
+                    if (table[i][j]==0) {
                         g2d.setColor(new Color(204, 102, 0));
-                    } else {
+                    } else if(table[i][j]==1){
                         g2d.setColor(new Color(204, 204, 0));
+                    } else if(table[i][j]==2){
+                        g2d.setColor(Color.green);
                     }
                     g2d.fillRect(x, y, distx, disty);
                     g2d.setColor(Color.black);
                     g2d.drawRect(x, y, distx, disty);
-                    y += disty;
+                    x+=distx;
                 }
-                x += distx;
+                y+= disty;
             }
             x = 20;
             y = 50;
@@ -122,14 +157,13 @@ public class Board extends JFrame {
             for (int i = N - 1; i >= 0; --i) {
                 x = 40;
                 for (int j = 0; j < N; ++j) {
-                    if (table[i][j] == 1) {
+                    if (pieces[i][j] == 1) {
                         g2d.drawImage(white.getImage(), x + 7, y + 7, 36, 36, null);
-                    } else if (table[i][j] == 2) {
+                    } else if (pieces[i][j] == 2) {
                         g2d.drawImage(black.getImage(), x + 7, y + 7, 36, 36, null);
-                    }
-                    else if (table[i][j] == 3) {
+                    } else if (pieces[i][j] == 3) {
                         g2d.drawImage(whitequeen.getImage(), x + 7, y + 7, 36, 36, null);
-                    } else if (table[i][j] == 4) {
+                    } else if (pieces[i][j] == 4) {
                         g2d.drawImage(blackqueen.getImage(), x + 7, y + 7, 36, 36, null);
                     }
                     x += distx;

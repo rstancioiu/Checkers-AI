@@ -4,8 +4,8 @@
 		[0,0,0,0,0,0,0,0,0,0],
 		[0,0,0,0,0,0,0,0,0,0],
 		[0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,1,0,0,0,0],
-		[0,0,0,0,1,0,0,0,0,0],
+		[0,0,0,0,0,0,0,0,0,0],
+		[0,0,0,0,1,0,1,0,0,0],
 		[0,0,0,0,0,2,0,0,0,0],
 		[0,0,0,0,0,0,0,0,0,0],
 		[0,0,0,0,0,0,0,0,0,0],
@@ -89,6 +89,7 @@ make_move(B,MOVE,NEWB,C) :-
 		nth0(0,MOVE,X),
 		nth0(1,MOVE,Y)
 	),
+	write(MOVE),nl,
 	nth0(2,MOVE,POS),
 	nth0(3,MOVE,KILLED),
 	length(KILLED,NB),
@@ -282,6 +283,47 @@ play_random(P,MOVE) :-
 	make_move(B,MOVE,NEWB,0),
 	retract(board(_)),
 	assert(board(NEWB)),!.
+
+/** ------------------------------------------------
+-----------------   USER ----------------------
+------------------------------------------------  */ 
+
+display_all_moves(P,MOVE) :-
+	board(B),
+	findall([PX,PY,L1,L2],possible(B,P,PX,PY,L1,L2,0),LMOVES),
+	select_kills(LMOVES,MOVES),
+	nth0(X,MOVES,MOVE).
+
+user_move(A,SX,SY, EX, EY, LIST,C)  :-
+	C>0,
+	length(LIST,C),!.
+
+user_move(A,SX,SY, EX, EY, LIST,C) :-
+	nth0(C, LIST, MOVE),
+	nth0(0,MOVE,SXP),
+	nth0(1,MOVE,SYP),
+	nth0(2,MOVE, L1),
+	length(L1,LENP),
+	LENP1 is LENP-1,
+	nth0(LENP1,L1,D),
+	nth0(0,D,EXP),
+	nth0(1,D,EYP),
+	( (SX==SXP,SY==SYP,EX==EXP,EY==EYP) -> 
+		A=MOVE,!;
+		C1 is C+1,
+	user_move(A,SX,SY, EX, EY, LIST,C1),!
+	).
+
+make_user_move(P,SX,SY,EX,EY) :-
+	board(B),
+	findall([PX,PY,L1,L2],possible(B,P,PX,PY,L1,L2,0),LMOVES),
+	select_kills(LMOVES,MOVES),
+	user_move(MOVE,SX,SY,EX,EY,MOVES,0),
+	make_move(B,MOVE,NEWB,0),
+	retract(board(_)),
+	assert(board(NEWB)),!.
+
+
 
 /** ------------------------------------------------
 -------------------   MIN MAX ----------------------

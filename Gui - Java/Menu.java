@@ -31,8 +31,8 @@ public class Menu extends JFrame{
         start = new JButton("Start");
         left[0] = new JButton("IA Random");
         right[0] = new JButton("IA Random");
-        left[1] = new JButton("Player 2");
-        right[1] = new JButton("Player 2");
+        left[1] = new JButton("User");
+        right[1] = new JButton("User");
         left[2] = new JButton("Player 3");
         right[2] = new JButton("Player 3");
         center[0]= new JTextField(""){
