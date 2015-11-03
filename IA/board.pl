@@ -342,43 +342,29 @@ evaluate(B,P,E) :-
 	length(L2,NBOP),
 	E is (NBP+(20-NBOP)).
 
+max(X,Y,Y) :- X =< Y.
+max(X,Y,X) :- X>Y.
+min(X,Y,Y) :- X >= Y.
+min(X,Y,X) :- X<Y.
+
 %End condition
-ia_max(_,MOVES,_,_,_,E,_,_,CURSOR,ECUR) :-
+ia_cmp(_,MOVES,_,_,_,E,_,_,CURSOR,ECUR,_) :-
 	CURSOR>0,
 	length(MOVES,CURSOR),
 	E=ECUR.
 
-ia_max(B,MOVES,P,DEPTH,Dinit,E,MOVEMAX,Pinit,CURSOR,ECUR) :-
+ia_cmp(B,MOVES,P,DEPTH,Dinit,E,MOVEWIN,Pinit,CURSOR,ECUR,GOAL) :-
 	nth0(CURSOR,MOVES,MOVE),
 	make_move(B,MOVE,B2,0),
 	minimax(B2,_,DEPTH,Dinit,E2,P,Pinit),
-	(E2 > ECUR ->
-		NEWMAX is E2,
-		MOVEMAX=MOVE
+	(call(GOAL,E2,ECUR,E2), E2\=ECUR ->
+		NEWWIN is E2,
+		MOVEWIN=MOVE
 		;
-		NEWMAX is ECUR
+		NEWWIN is ECUR
 	),
 	NEWC is CURSOR+1,
-	ia_max(B,MOVES,P,DEPTH,Dinit,E,MOVEMAX,Pinit,NEWC,NEWMAX).
-
-%End condition
-ia_min(_,MOVES,_,_,_,E,_,_,CURSOR,ECUR) :-
-	CURSOR>0,
-	length(MOVES,CURSOR),
-	E=ECUR.
-
-ia_min(B,MOVES,P,DEPTH,Dinit,E,MOVEMIN,Pinit,CURSOR,ECUR) :-
-	nth0(CURSOR,MOVES,MOVE),
-	make_move(B,MOVE,B2,0),
-	minimax(B2,_,DEPTH,Dinit,E2,P,Pinit),
-	(E2 < ECUR ->
-		NEWMIN is E2,
-		MOVEMIN=MOVE
-		;
-		NEWMIN is ECUR
-	),
-	NEWC is CURSOR+1,
-	ia_min(B,MOVES,P,DEPTH,Dinit,E,MOVEMIN,Pinit,NEWC,NEWMIN).
+	ia_cmp(B,MOVES,P,DEPTH,Dinit,E,MOVEWIN,Pinit,NEWC,NEWWIN,GOAL).
 
 minimax(B,MOV,DEPTH,Dinit,E,P,Pinit):-
 	(DEPTH==0 ->
@@ -388,10 +374,10 @@ minimax(B,MOV,DEPTH,Dinit,E,P,Pinit):-
 		select_kills(LMOVES,NEWMOVES),
 		P2 is 1-P,
 		D2 is DEPTH-1,
-		(P==Pinit -> 
-			ia_max(B,NEWMOVES,P2,D2,Dinit,E,R,Pinit,0,0)
+		(P==Pinit ->
+			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,R,Pinit,0,0,max)
 			;
-			ia_min(B,NEWMOVES,P2,D2,Dinit,E,R,Pinit,0,9999)
+			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,R,Pinit,0,9999,min)
 		),
 		(DEPTH==Dinit ->
 			MOV=R
