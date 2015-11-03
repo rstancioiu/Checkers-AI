@@ -76,7 +76,7 @@ eat(B,OLDX,OLDY,X,Y,EX,EY,NEWB) :-
 make_move(B,MOVE,B,C) :-
 	nth0(2,MOVE,POS),
 	C>0,
-	length(POS,C).
+	length(POS,C),!.
 
 %Use a move given by an IA to update the board
 make_move(B,MOVE,NEWB,C) :-
@@ -351,7 +351,7 @@ min(X,Y,X) :- X<Y.
 ia_cmp(_,MOVES,_,_,_,E,_,_,CURSOR,ECUR,_) :-
 	CURSOR>0,
 	length(MOVES,CURSOR),
-	E=ECUR.
+	E=ECUR,!.
 
 ia_cmp(B,MOVES,P,DEPTH,Dinit,E,MOVEWIN,Pinit,CURSOR,ECUR,GOAL) :-
 	nth0(CURSOR,MOVES,MOVE),
