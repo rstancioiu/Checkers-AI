@@ -35,13 +35,17 @@ public class Game implements Runnable {
         else if (player1.equals("User"))
             query1 = "display_all_moves(1,MOVE)";
         else if (player1.equals("IA MiniMax"))
-            query1 = "play_minimax(1,MOVE)";
+            query1 = "play_minimax(2,1,MOVE)";
+        else if (player1.equals("IA MiniMaxS"))
+            query1 = "play_minimax_special(2,1,MOVE)";
         if (player2.equals("IA Random"))
             query2 = "play_random(0,MOVE)";
         else if (player2.equals("User"))
             query2 = "display_all_moves(0,MOVE)";
         else if (player2.equals("IA MiniMax"))
-            query2 = "play_minimax(0,MOVE)";
+            query2 = "play_minimax(2,0,MOVE)";
+        else if (player2.equals("IA MiniMaxS"))
+            query2 = "play_minimax_special(2,0,MOVE)";
     }
 
     private void start() {
@@ -49,6 +53,7 @@ public class Game implements Runnable {
                              new Atom("C:\\cygwin64\\home\\Afkid\\GitHub\\Game_prolog\\IA\\board.pl") });
         System.out.println((q1.hasSolution() ? "succeeded" : "failed"));
         initTable();
+        initPieces();
         updateTablePieces();
         board = new Board(pieces, table, this);
     }
@@ -57,6 +62,12 @@ public class Game implements Runnable {
         for (int i = 0; i < N; ++i)
             for (int j = 0; j < N; ++j)
                 table[i][j] = (i + j) % 2;
+    }
+
+    private void initPieces(){
+        String t1 = "init";
+        Query q1 = new Query(t1);
+        System.out.println((q1.hasSolution() ? "Init realised" : "Init failed"));
     }
 
     private void updateTablePieces() {
@@ -111,6 +122,11 @@ public class Game implements Runnable {
         change = false;
         String str;
         for (;;) {
+            try {
+                Thread.sleep(100); //1000 milliseconds is one second.
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
             if (change)
                 str = query1;
             else
@@ -151,7 +167,7 @@ public class Game implements Runnable {
                 board.update(pieces, table);
             }
             try {
-                Thread.sleep(200); //1000 milliseconds is one second.
+                Thread.sleep(100); //1000 milliseconds is one second.
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
             }

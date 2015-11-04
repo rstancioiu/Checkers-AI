@@ -34,7 +34,7 @@ init :-
 			          [2,0,2,0,2,0,2,0,2,0]]))
 	).
 	
-/** Bacup : an empty board and the initial board
+/** Backup : an empty board and the initial board
 
 assert(board([[0,0,0,0,0,0,0,0,0,0],
        		  [0,0,0,0,0,0,0,0,0,0],
@@ -322,11 +322,17 @@ owned_by(B,P,X,Y) :-
 	TMP is VAL mod 2,
 	TMP==P.
 
+queens_owned_by(B,P,X,Y) :-
+	get2D(B,X,Y,VAL),
+	VAL>2,
+	TMP is VAL mod 2,
+	TMP==P.
+
 check_win_player(P1) :-
 	board(B),
 	check_win(B,P1).
 
-%Win if the other player can't move or has nothing left on board
+%Win if the other player cannot move or has nothing left on board
 check_win(B,P1) :-
 	P2 is 1-P1,
 	findall([PX,PY,L1,L2],possible(B,P2,PX,PY,L1,L2,0),L),
@@ -380,6 +386,22 @@ make_user_move(P,SX,SY,EX,EY) :-
 -------------------   MIN MAX ----------------------
 ------------------------------------------------  */
 
+
+evaluate_special(BF,P,E) :-
+	board(B),
+	findall([X,Y],owned_by(B,P,X,Y),L1),
+	findall([X,Y],owned_by(BF,P,X,Y),L3),
+	findall([X,Y],queens_owned_by(B,P,X,Y),QL1),
+	findall([X,Y],queens_owned_by(BF,P,X,Y),QL3),
+	OTHERP is 1-P,
+	findall([X,Y],owned_by(B,OTHERP,X,Y),L2),
+	findall([X,Y],owned_by(BF,OTHERP,X,Y),L4),
+	findall([X,Y],queens_owned_by(B,OTHERP,X,Y),QL2),
+	findall([X,Y],queens_owned_by(BF,OTHERP,X,Y),QL4),
+	length(L1,NBP1),length(L2,NBP2),length(L3,NBP3),length(L4,NBP4),
+	length(QL1,NBQ1),length(QL2,NBQ2),length(QL3,NBQ3),length(QL4,NBQ4),
+	E is ((NBP4+NBP1-NBP2-NBP3)+(NBQ4+NBQ1-NBQ2-NBQ3)*2).
+
 evaluate(B,P,E) :-
 	findall([X,Y],owned_by(B,P,X,Y),L),
 	OTHERP is 1-P,
@@ -406,9 +428,9 @@ ia_cmp(B,MOVES,P,DEPTH,Dinit,E,MOVECUR,MOVEWIN,Pinit,CURSOR,ECUR,GOAL) :-
 	P2 is 1-P,
 	(check_win(B2,P2) ->
 		MOVEWIN=MOVE,
-		member(E,[0,9999]),
+		member(E,[-9999,9999]),
 		call(GOAL,E,9999,E),
-		call(GOAL,E,0,E)
+		call(GOAL,E,-9999,E)
 		;
 		minimax(B2,_,DEPTH,Dinit,E2,P,Pinit),
 		((call(GOAL,E2,ECUR,E2), E2\=ECUR) ->
@@ -431,7 +453,27 @@ minimax(B,MOV,DEPTH,Dinit,E,P,Pinit):-
 		P2 is 1-P,
 		D2 is DEPTH-1,
 		(P==Pinit ->
-			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,_,R,Pinit,0,-1,max)
+			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,_,R,Pinit,0,-10000,max)
+			;
+			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,_,R,Pinit,0,10000,min)
+		),
+		(DEPTH==Dinit ->
+			MOV=R
+			;
+			true
+		)
+	).
+
+minimax_special(B,MOV,DEPTH,Dinit,E,P,Pinit):-
+	(DEPTH==0 ->
+		evaluate_special(B,Pinit,E)
+		;
+		findall([PX,PY,L1,L2],possible(B,P,PX,PY,L1,L2,0),LMOVES),
+		select_kills(LMOVES,NEWMOVES),
+		P2 is 1-P,
+		D2 is DEPTH-1,
+		(P==Pinit ->
+			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,_,R,Pinit,0,-10000,max)
 			;
 			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,_,R,Pinit,0,10000,min)
 		),
@@ -445,6 +487,13 @@ minimax(B,MOV,DEPTH,Dinit,E,P,Pinit):-
 play_minimax(D,P,MOVE) :-
 	board(B),
 	minimax(B,MOVE,D,D,_,P,P),
+	make_move(B,MOVE,NEWB,0),
+	retract(board(_)),
+	assert(board(NEWB)),!.
+
+play_minimax_special(D,P,MOVE) :-
+	board(B),
+	minimax_special(B,MOVE,D,D,_,P,P),
 	make_move(B,MOVE,NEWB,0),
 	retract(board(_)),
 	assert(board(NEWB)),!.
@@ -504,6 +553,14 @@ minmax_vs_minmax(NB) :-
 	write("Number of games : "),write(NB),nl,nl,
 	write("Progress : "),
 	test_versus(0,0,NB,play_minimax(1),play_minimax(2),W),
-	nl,nl,write("Games won by Minimax2 : "),write(W),write("/"),write(NB),nl,
+	nl,nl,write("Games won by Minimax2 : "),
+	write(W),write("/"),write(NB),nl,	
 	write(" --- TEST finished --- "),nl,nl,!.
-	
+
+minmaxspecial_vs_minmax(NB) :-
+	nl,write(" --- TEST MinMaxSpecial2 VS MinMax1 --- "),nl,
+	write("Number of games : "),write(NB),nl,nl,
+	write("Progress : "),
+	test_versus(0,0,NB,play_minimax_special(3),play_minimax(3),W),
+	nl,nl,write("Games won by MinimaxSpecial2 : "),write(W),write("/"),write(NB),nl,
+	write(" --- TEST finished --- "),nl,nl,!.

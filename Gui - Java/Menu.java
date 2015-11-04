@@ -9,7 +9,7 @@ import javax.swing.border.Border;
 
 public class Menu extends JFrame{
 
-    static final int SIZE=3;    
+    static final int SIZE=4;    
     JButton start;
     JButton left[]=new JButton[SIZE];
     JButton right[]=new JButton[SIZE];
@@ -35,6 +35,8 @@ public class Menu extends JFrame{
         right[1] = new JButton("User");
         left[2] = new JButton("IA MiniMax");
         right[2] = new JButton("IA MiniMax");
+        left[3] = new JButton("IA MiniMaxS");
+        right[3] = new JButton("IA MiniMaxS");
         center[0]= new JTextField(""){
             @Override public void setBorder(Border border) {
                 // No!
@@ -53,17 +55,21 @@ public class Menu extends JFrame{
         start.setBounds(250,500,100,50);
         start.addActionListener(new ListenerStart());
         left[0].setBounds(20,100,120,50);
-        left[1].setBounds(20,200,120,50);
-        left[2].setBounds(20,300,120,50);
+        left[1].setBounds(20,180,120,50);
+        left[2].setBounds(20,260,120,50);
+        left[3].setBounds(20,340,120,50);
         left[0].addActionListener(new ListenerLeft());
         left[1].addActionListener(new ListenerLeft());
         left[2].addActionListener(new ListenerLeft());
+        left[3].addActionListener(new ListenerLeft());
         right[0].setBounds(460,100,120,50);
-        right[1].setBounds(460,200,120,50);
-        right[2].setBounds(460,300,120,50);
+        right[1].setBounds(460,180,120,50);
+        right[2].setBounds(460,260,120,50);
+        right[3].setBounds(460,340,120,50);
         right[0].addActionListener(new ListenerRight());
         right[1].addActionListener(new ListenerRight());
         right[2].addActionListener(new ListenerRight());
+        right[3].addActionListener(new ListenerRight());
         center[0].setBounds(150,250,100,60);
         center[0].setHorizontalAlignment(JTextField.CENTER);
         center[0].setEditable(false);
@@ -77,8 +83,10 @@ public class Menu extends JFrame{
         for(int i=0;i<SIZE;++i) {
             panel.add(left[i]);
             panel.add(right[i]);
-            center[i].setOpaque(false);
-            panel.add(center[i]);
+            if(i<3){
+                center[i].setOpaque(false);
+                panel.add(center[i]);
+            }
         }
         add(panel);
         
