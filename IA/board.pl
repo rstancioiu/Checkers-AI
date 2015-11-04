@@ -1,15 +1,15 @@
 %Initialize board
 :- dynamic board/1.
- board([[0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,1,0,1,0,0,0],
-		[0,0,0,0,0,2,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0],
-		[0,0,0,0,0,0,0,0,0,0]]).
+board([[0,1,0,1,0,1,0,1,0,1],
+       [1,0,1,0,1,0,1,0,1,0],
+       [0,1,0,1,0,1,0,1,0,1],
+       [1,0,1,0,1,0,1,0,1,0],
+       [0,0,0,0,0,0,0,0,0,0],
+       [0,0,0,0,0,0,0,0,0,0],
+       [0,2,0,2,0,2,0,2,0,2],
+       [2,0,2,0,2,0,2,0,2,0],
+       [0,2,0,2,0,2,0,2,0,2],
+       [2,0,2,0,2,0,2,0,2,0]]).
 
 %Show current board state
 game :-
@@ -76,7 +76,7 @@ eat(B,OLDX,OLDY,X,Y,EX,EY,NEWB) :-
 make_move(B,MOVE,B,C) :-
 	nth0(2,MOVE,POS),
 	C>0,
-	length(POS,C),!.
+	length(POS,C).
 
 %Use a move given by an IA to update the board
 make_move(B,MOVE,NEWB,C) :-
@@ -184,6 +184,10 @@ is_legal_eat(B,OLDX,OLDY,X,Y,DMAX,EX,EY) :-
 %L1 contains positions and L2 ennemies killed on the path
 %CURSOR is used to browse L1 and L2
 
+possible_real(P,OLDX,OLDY,L1,L2,0) :-
+	board(B),
+	possible(B,P,OLDX,OLDY,L1,L2,0).
+
 %Possible move if it's a legal move and it's the only option of the list
 possible(B,P,OLDX,OLDY,L1,L2,0) :-
 	length(L1,1),
@@ -212,7 +216,7 @@ possible(B,P,OLDX,OLDY,L1,L2,CURSOR) :-
 possible_eat(_,_,_,_,L1,L2,C) :-
 	C>0,
 	length(L1,C),
-	length(L2,C),!.
+	length(L2,C).
 
 possible_eat(B,P,OLDX,OLDY,L1,L2,CURSOR) :-
 	get2D(B,OLDX,OLDY,VAL),
@@ -246,7 +250,7 @@ rand_member(A, LIST) :-
 max_kills(MOVES,MAX,C,FINALMAX) :-
 	C>0,
 	length(MOVES,C),
-	FINALMAX=MAX,!.
+	FINALMAX=MAX.
 
 %Get number of kills
 max_kills(MOVES,MAX,C,FINALMAX) :-
@@ -293,36 +297,25 @@ display_all_moves(P,MOVE) :-
 	select_kills(LMOVES,MOVES),
 	member(MOVE,MOVES).
 
-user_move(_,_,_,_,_,LIST,C)  :-
-	C>0,
-	length(LIST,C),!.
-
-user_move(A,SX,SY,EX,EY,LIST,C) :-
+user_move(M,EX,EY,LIST) :-
+	member(MOVE,LIST),
 	nth0(C,LIST,MOVE),
-	nth0(0,MOVE,SXP),
-	nth0(1,MOVE,SYP),
 	nth0(2,MOVE,L1),
-	length(L1,LENP),
-	LENP1 is LENP-1,
-	nth0(LENP1,L1,D),
+	last(L1,D),
 	nth0(0,D,EXP),
 	nth0(1,D,EYP),
-	( (SX==SXP,SY==SYP,EX==EXP,EY==EYP) -> 
-		A=MOVE,!;
-		C1 is C+1,
-	user_move(A,SX,SY,EX,EY,LIST,C1),!
-	).
+	EX==EXP,
+	EY==EYP,
+	M=MOVE.
 
 make_user_move(P,SX,SY,EX,EY) :-
 	board(B),
-	findall([PX,PY,L1,L2],possible(B,P,PX,PY,L1,L2,0),LMOVES),
+	findall([SX,SY,L1,L2],possible(B,P,SX,SY,L1,L2,0),LMOVES),
 	select_kills(LMOVES,MOVES),
-	user_move(MOVE,SX,SY,EX,EY,MOVES,0),
+	user_move(MOVE,EX,EY,MOVES,0),
 	make_move(B,MOVE,NEWB,0),
 	retract(board(_)),
 	assert(board(NEWB)),!.
-
-
 
 /** ------------------------------------------------
 -------------------   MIN MAX ----------------------
@@ -351,7 +344,7 @@ min(X,Y,X) :- X<Y.
 ia_cmp(_,MOVES,_,_,_,E,_,_,CURSOR,ECUR,_) :-
 	CURSOR>0,
 	length(MOVES,CURSOR),
-	E=ECUR,!.
+	E=ECUR.
 
 ia_cmp(B,MOVES,P,DEPTH,Dinit,E,MOVEWIN,Pinit,CURSOR,ECUR,GOAL) :-
 	nth0(CURSOR,MOVES,MOVE),
