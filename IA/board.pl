@@ -45,7 +45,7 @@ assert(board([[0,0,0,0,0,0,0,0,0,0],
        		  [0,0,0,0,0,0,0,0,0,0],
        		  [0,0,0,0,0,0,0,0,0,0],
        		  [0,0,0,0,0,0,0,0,0,0],
-       		  [0,0,0,0,0,0,0,0,0,0]]).
+       		  [0,0,0,0,0,0,0,0,0,0]]))
 
 assert(board([[0,1,0,1,0,1,0,1,0,1],
 	          [1,0,1,0,1,0,1,0,1,0],
@@ -57,6 +57,7 @@ assert(board([[0,1,0,1,0,1,0,1,0,1],
 	          [2,0,2,0,2,0,2,0,2,0],
 	          [0,2,0,2,0,2,0,2,0,2],
 	          [2,0,2,0,2,0,2,0,2,0]]))
+
 */
 
 %Show current board state
@@ -325,14 +326,7 @@ check_win_player(P1) :-
 	board(B),
 	check_win(B,P1).
 
-%Win if the other player has nothing on the board
-check_win(B,P1) :-
-	P2 is 1-P1,
-	findall([X,Y],owned_by(B,P2,X,Y),L),
-	length(L,LEN),
-	LEN==0.
-
-%Win if the other player can't move
+%Win if the other player can't move or has nothing left on board
 check_win(B,P1) :-
 	P2 is 1-P1,
 	findall([PX,PY,L1,L2],possible(B,P2,PX,PY,L1,L2,0),L),
@@ -512,3 +506,4 @@ minmax_vs_minmax(NB) :-
 	test_versus(0,0,NB,play_minimax(1),play_minimax(2),W),
 	nl,nl,write("Games won by Minimax2 : "),write(W),write("/"),write(NB),nl,
 	write(" --- TEST finished --- "),nl,nl,!.
+	
