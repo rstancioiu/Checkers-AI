@@ -1,43 +1,62 @@
+/** ------------------------------------------------
+---------------   PROLOG Checkers ------------------
+
+	INSA de Lyon 4IF - October/November 2015
+
+	Group 1 - Subgroup 4 :
+		Benoit Chabod
+		Razvan Stancioiu
+		Romain Duteil
+		Loic Champavere
+		Hugo Sipahimalani
+		Adrien Juguet
+		Maria Beatriz Vaz
+
+------------------------------------------------  */  
+
 %Initialize board
 :- dynamic board/1.
 
-/**
-board([[0,0,0,0,0,0,0,0,0,0],
-       [0,0,0,0,0,0,0,0,0,0],
-       [0,0,0,0,0,0,0,0,0,0],
-       [0,0,0,0,0,0,0,0,0,0],
-       [0,0,0,0,0,0,0,0,0,0],
-       [0,0,0,0,0,0,0,0,0,0],
-       [0,0,0,0,0,0,0,0,0,0],
-       [0,0,0,0,0,0,0,0,0,0],
-       [0,0,0,0,0,0,0,0,0,0],
-       [0,0,0,0,0,0,0,0,0,0]]).
-*/
+init :-
+	(board(_) ->
+		retract(board(_)),
+		init
+		;
+		assert(board([[0,1,0,1,0,1,0,1,0,1],
+			          [1,0,1,0,1,0,1,0,1,0],
+			          [0,1,0,1,0,1,0,1,0,1],
+			          [1,0,1,0,1,0,1,0,1,0],
+			          [0,0,0,0,0,0,0,0,0,0],
+			          [0,0,0,0,0,0,0,0,0,0],
+			          [0,2,0,2,0,2,0,2,0,2],
+			          [2,0,2,0,2,0,2,0,2,0],
+			          [0,2,0,2,0,2,0,2,0,2],
+			          [2,0,2,0,2,0,2,0,2,0]]))
+	).
+	
+/** Bacup : an empty board and the initial board
 
-board([[0,0,0,0,0,0,0,0,0,0],
-       [0,0,0,0,0,0,0,0,0,0],
-       [0,0,0,0,0,0,0,0,0,0],
-       [0,0,0,0,0,0,0,0,0,0],
-       [0,0,0,0,0,1,0,0,0,0],
-       [0,0,0,0,0,0,0,0,1,0],
-       [0,0,0,1,0,0,0,0,0,0],
-       [0,0,0,0,0,0,0,0,0,0],
-       [0,0,0,0,0,0,0,0,0,0],
-       [4,0,0,0,0,0,0,0,0,0]]).
+assert(board([[0,0,0,0,0,0,0,0,0,0],
+       		  [0,0,0,0,0,0,0,0,0,0],
+       		  [0,0,0,0,0,0,0,0,0,0],
+       		  [0,0,0,0,0,0,0,0,0,0],
+       		  [0,0,0,0,0,0,0,0,0,0],
+       		  [0,0,0,0,0,0,0,0,0,0],
+       		  [0,0,0,0,0,0,0,0,0,0],
+       		  [0,0,0,0,0,0,0,0,0,0],
+       		  [0,0,0,0,0,0,0,0,0,0],
+       		  [0,0,0,0,0,0,0,0,0,0]]).
 
-/**
-clearboard :-
-	retract(board(_)),
-	assert(board([[0,1,0,1,0,1,0,1,0,1],
-       [1,0,1,0,1,0,1,0,1,0],
-       [0,1,0,1,0,1,0,1,0,1],
-       [1,0,1,0,1,0,1,0,1,0],
-       [0,0,0,0,0,0,0,0,0,0],
-       [0,0,0,0,0,0,0,0,0,0],
-       [0,2,0,2,0,2,0,2,0,2],
-       [2,0,2,0,2,0,2,0,2,0],
-       [0,2,0,2,0,2,0,2,0,2],
-       [2,0,2,0,2,0,2,0,2,0]])).
+assert(board([[0,1,0,1,0,1,0,1,0,1],
+	          [1,0,1,0,1,0,1,0,1,0],
+	          [0,1,0,1,0,1,0,1,0,1],
+	          [1,0,1,0,1,0,1,0,1,0],
+	          [0,0,0,0,0,0,0,0,0,0],
+	          [0,0,0,0,0,0,0,0,0,0],
+	          [0,2,0,2,0,2,0,2,0,2],
+	          [2,0,2,0,2,0,2,0,2,0],
+	          [0,2,0,2,0,2,0,2,0,2],
+	          [2,0,2,0,2,0,2,0,2,0]]))
 */
 
 %Show current board state
@@ -66,10 +85,6 @@ set2D(B,X,Y,VAL,B2) :-
 	nth0(Y, B, LINE),
 	set(LINE, X, VAL, LINE2),
 	set(B, Y, LINE2, B2).
-
-%Reminder : how to actually update board
-%	retract(board(_)),
-%	assert(board(NEWB)),
 
 %Turn pawn into queen
 check_queen(B,X,Y,NEWB) :-
@@ -214,11 +229,6 @@ is_legal_eat(B,OLDX,OLDY,X,Y,DMAX,EX,EY) :-
 
 %POSSIBLE : list all possible choices for entity @coords OLDX,OLDY
 %L1 contains positions and L2 ennemies killed on the path
-%CURSOR is used to browse L1 and L2
-
-possible_real(P,OLDX,OLDY,L1,L2,0) :-
-	board(B),
-	possible(B,P,OLDX,OLDY,L1,L2,0).
 
 %Possible move if it's a legal move and it's the only option of the list
 possible(B,P,OLDX,OLDY,L1,L2,0) :-
@@ -305,7 +315,6 @@ select_kills(LMOVES,NEWMOVES) :-
 	max_kills(LMOVES,0,0,FINALMAX),
 	findall(M,is_max_kills(M,LMOVES,FINALMAX),NEWMOVES).
 
-
 owned_by(B,P,X,Y) :-
 	get2D(B,X,Y,VAL),
 	VAL>0,
@@ -316,9 +325,17 @@ check_win_player(P1) :-
 	board(B),
 	check_win(B,P1).
 
+%Win if the other player has nothing on the board
 check_win(B,P1) :-
 	P2 is 1-P1,
 	findall([X,Y],owned_by(B,P2,X,Y),L),
+	length(L,LEN),
+	LEN==0.
+
+%Win if the other player can't move
+check_win(B,P1) :-
+	P2 is 1-P1,
+	findall([PX,PY,L1,L2],possible(B,P2,PX,PY,L1,L2,0),L),
 	length(L,LEN),
 	LEN==0.
 
@@ -337,7 +354,7 @@ play_random(P,MOVE) :-
 	assert(board(NEWB)),!.
 
 /** ------------------------------------------------
------------------   USER ----------------------
+---------------------   USER -----------------------
 ------------------------------------------------  */ 
 
 display_all_moves(P,MOVE) :-
@@ -431,9 +448,67 @@ minimax(B,MOV,DEPTH,Dinit,E,P,Pinit):-
 		)
 	).
 
-play_minimax(P,MOVE) :-
+play_minimax(D,P,MOVE) :-
 	board(B),
-	minimax(B,MOVE,3,3,_,P,P),
+	minimax(B,MOVE,D,D,_,P,P),
 	make_move(B,MOVE,NEWB,0),
 	retract(board(_)),
 	assert(board(NEWB)),!.
+
+/** ------------------------------------------------
+----------------   BENCHMARKS ----------------------
+------------------------------------------------  */
+
+versus(PRANDOM,TOUR,WIN,IA0,IA1) :-
+	(PRANDOM==0 ->
+		call(IA0,0,_)
+		;
+		call(IA1,1,_)
+	),
+	(check_win_player(PRANDOM) ->
+		WIN=PRANDOM
+		;
+		PNEXT is 1-PRANDOM,
+		TOURNEXT is TOUR+1,
+		versus(PNEXT,TOURNEXT,WIN,IA0,IA1)
+	).
+
+%End condition
+test_versus(COUNTER,WIN_MINMAX,NB,_,_,WFINAL) :-
+	COUNTER==NB,
+	WFINAL=WIN_MINMAX,!.
+
+%Loop
+test_versus(COUNTER,WIN_MINMAX,NB,IA0,IA1,WFINAL) :-
+	COUNTER>=0,
+	COUNTER<NB,
+	init,
+	versus(0,0,W,IA0,IA1),
+	write(COUNTER),write('-'),flush_output,
+	WIN_MINMAX2 is WIN_MINMAX+W,
+	COUNTER2 is COUNTER+1,
+	test_versus(COUNTER2,WIN_MINMAX2,NB,IA0,IA1,WFINAL).
+
+random_vs_random(NB) :-
+	nl,write(" --- TEST Random VS Random --- "),nl,
+	write("Number of games : "),write(NB),nl,nl,
+	write("Progress : "),
+	test_versus(0,0,NB,play_random,play_random,W),
+	nl,nl,write("Balance : "),write(W),write("/"),write(NB),nl,
+	write(" --- TEST finished --- "),nl,nl,!.
+
+minmax_vs_random(NB) :-
+	nl,write(" --- TEST MinMax2 VS Random --- "),nl,
+	write("Number of games : "),write(NB),nl,nl,
+	write("Progress : "),
+	test_versus(0,0,NB,play_random,play_minimax(2),W),
+	nl,nl,write("Games won by MinMax2 : "),write(W),write("/"),write(NB),nl,
+	write(" --- TEST finished --- "),nl,nl,!.
+
+minmax_vs_minmax(NB) :-
+	nl,write(" --- TEST MinMax2 VS MinMax1 --- "),nl,
+	write("Number of games : "),write(NB),nl,nl,
+	write("Progress : "),
+	test_versus(0,0,NB,play_minimax(1),play_minimax(2),W),
+	nl,nl,write("Games won by Minimax2 : "),write(W),write("/"),write(NB),nl,
+	write(" --- TEST finished --- "),nl,nl,!.
