@@ -1,5 +1,6 @@
 %Initialize board
 :- dynamic board/1.
+
 board([[0,1,0,1,0,1,0,1,0,1],
        [1,0,1,0,1,0,1,0,1,0],
        [0,1,0,1,0,1,0,1,0,1],
@@ -10,6 +11,21 @@ board([[0,1,0,1,0,1,0,1,0,1],
        [2,0,2,0,2,0,2,0,2,0],
        [0,2,0,2,0,2,0,2,0,2],
        [2,0,2,0,2,0,2,0,2,0]]).
+
+/**
+clearboard :-
+	retract(board(_)),
+	assert(board([[0,1,0,1,0,1,0,1,0,1],
+       [1,0,1,0,1,0,1,0,1,0],
+       [0,1,0,1,0,1,0,1,0,1],
+       [1,0,1,0,1,0,1,0,1,0],
+       [0,0,0,0,0,0,0,0,0,0],
+       [0,0,0,0,0,0,0,0,0,0],
+       [0,2,0,2,0,2,0,2,0,2],
+       [2,0,2,0,2,0,2,0,2,0],
+       [0,2,0,2,0,2,0,2,0,2],
+       [2,0,2,0,2,0,2,0,2,0]])).
+*/
 
 %Show current board state
 game :-
@@ -208,7 +224,7 @@ possible(B,P,OLDX,OLDY,L1,L2,0) :-
 	),
 	is_legal_move(B,OLDX,OLDY,X,Y,DMAX,BACKWARDS,0).
 
-%Possible eats if they're all legals and follow each other
+%Possible eats if they are all legals and follow each other
 possible(B,P,OLDX,OLDY,L1,L2,CURSOR) :-
 	possible_eat(B,P,OLDX,OLDY,L1,L2,CURSOR).
 
@@ -340,23 +356,25 @@ min(X,Y,Y) :- X >= Y.
 min(X,Y,X) :- X<Y.
 
 %End condition
-ia_cmp(_,MOVES,_,_,_,E,_,_,CURSOR,ECUR,_) :-
+ia_cmp(_,MOVES,_,_,_,E,MOVECUR,MOVEWIN,_,CURSOR,ECUR,_) :-
 	CURSOR>0,
 	length(MOVES,CURSOR),
-	E=ECUR.
+	E=ECUR,
+	MOVEWIN=MOVECUR.
 
-ia_cmp(B,MOVES,P,DEPTH,Dinit,E,MOVEWIN,Pinit,CURSOR,ECUR,GOAL) :-
+ia_cmp(B,MOVES,P,DEPTH,Dinit,E,MOVECUR,MOVEWIN,Pinit,CURSOR,ECUR,GOAL) :-
 	nth0(CURSOR,MOVES,MOVE),
 	make_move(B,MOVE,B2,0),
 	minimax(B2,_,DEPTH,Dinit,E2,P,Pinit),
-	(call(GOAL,E2,ECUR,E2), E2\=ECUR ->
+	((call(GOAL,E2,ECUR,E2), E2\=ECUR) ->
 		NEWWIN is E2,
-		MOVEWIN=MOVE
+		NEWMOVECUR=MOVE
 		;
-		NEWWIN is ECUR
+		NEWWIN is ECUR,
+		NEWMOVECUR=MOVECUR
 	),
 	NEWC is CURSOR+1,
-	ia_cmp(B,MOVES,P,DEPTH,Dinit,E,MOVEWIN,Pinit,NEWC,NEWWIN,GOAL).
+	ia_cmp(B,MOVES,P,DEPTH,Dinit,E,NEWMOVECUR,MOVEWIN,Pinit,NEWC,NEWWIN,GOAL).
 
 minimax(B,MOV,DEPTH,Dinit,E,P,Pinit):-
 	(DEPTH==0 ->
@@ -367,9 +385,9 @@ minimax(B,MOV,DEPTH,Dinit,E,P,Pinit):-
 		P2 is 1-P,
 		D2 is DEPTH-1,
 		(P==Pinit ->
-			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,R,Pinit,0,0,max)
+			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,_,R,Pinit,0,0,max)
 			;
-			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,R,Pinit,0,9999,min)
+			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,_,R,Pinit,0,9999,min)
 		),
 		(DEPTH==Dinit ->
 			MOV=R
@@ -380,7 +398,7 @@ minimax(B,MOV,DEPTH,Dinit,E,P,Pinit):-
 
 play_minimax(P,MOVE) :-
 	board(B),
-	minimax(B,MOVE,1,1,_,P,P),
+	minimax(B,MOVE,4,4,_,P,P),
 	make_move(B,MOVE,NEWB,0),
 	retract(board(_)),
 	assert(board(NEWB)),!.
