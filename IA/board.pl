@@ -18,11 +18,11 @@ board([[0,0,0,0,0,0,0,0,0,0],
        [0,0,0,0,0,0,0,0,0,0],
        [0,0,0,0,0,0,0,0,0,0],
        [0,0,0,0,0,0,0,0,0,0],
-       [0,0,0,0,0,0,0,0,0,0],
-       [0,0,0,0,0,0,0,0,0,0],
+       [0,0,0,0,0,1,0,0,0,0],
+       [0,0,0,0,0,0,0,0,1,0],
        [0,0,0,1,0,0,0,0,0,0],
        [0,0,0,0,0,0,0,0,0,0],
-       [0,2,0,0,0,0,0,0,0,0],
+       [0,0,0,0,0,0,0,0,0,0],
        [4,0,0,0,0,0,0,0,0,0]]).
 
 /**
@@ -238,7 +238,7 @@ possible(B,P,OLDX,OLDY,L1,L2,0) :-
 		DMAX is 1,
 		BACKWARDS is 0
 	),
-	is_legal_move(B,OLDX,OLDY,X,Y,DMAX,BACKWARDS,0).
+	is_legal_move(B,OLDX,OLDY,X,Y,DMAX,BACKWARDS,1).
 
 %Possible eats if they are all legals and follow each other
 possible(B,P,OLDX,OLDY,L1,L2,CURSOR) :-
