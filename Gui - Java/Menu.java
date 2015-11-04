@@ -33,8 +33,8 @@ public class Menu extends JFrame{
         right[0] = new JButton("IA Random");
         left[1] = new JButton("User");
         right[1] = new JButton("User");
-        left[2] = new JButton("Player 3");
-        right[2] = new JButton("Player 3");
+        left[2] = new JButton("IA MiniMax");
+        right[2] = new JButton("IA MiniMax");
         center[0]= new JTextField(""){
             @Override public void setBorder(Border border) {
                 // No!

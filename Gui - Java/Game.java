@@ -34,10 +34,14 @@ public class Game implements Runnable {
             query1 = "play_random(1,MOVE)";
         else if (player1.equals("User"))
             query1 = "display_all_moves(1,MOVE)";
+        else if (player1.equals("IA MiniMax"))
+            query1 = "play_minimax(1,MOVE)";
         if (player2.equals("IA Random"))
             query2 = "play_random(0,MOVE)";
         else if (player2.equals("User"))
             query2 = "display_all_moves(0,MOVE)";
+        else if (player2.equals("IA MiniMax"))
+            query2 = "play_minimax(0,MOVE)";
     }
 
     private void start() {
@@ -69,6 +73,38 @@ public class Game implements Runnable {
                 }
             }
         }
+    }
+
+    private boolean checkWin(){
+        String win1="check_win_player(0)"; //black
+        String win2="check_win_player(1)"; //white
+        Query q1 = new Query(win1);
+        Query q2 = new Query(win2);
+        if(q1.hasSolution()){
+            System.out.println("Player black won");
+            for(int i=0;i<N;++i){
+                for(int j=0;j<N;++j){
+                    if(pieces[i][j]==2 || pieces[i][j]==4)
+                        table[i][j]=2;
+                    else
+                        table[i][j]=(i+j)%2;
+                }
+            }
+            return true;
+        }
+        if(q2.hasSolution()){
+            System.out.println("Player white won");
+            for(int i=0;i<N;++i){
+                for(int j=0;j<N;++j){
+                    if(pieces[i][j]==1 || pieces[i][j]==3)
+                        table[i][j]=2;
+                    else
+                        table[i][j]=(i+j)%2;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     public void run() {
@@ -115,9 +151,13 @@ public class Game implements Runnable {
                 board.update(pieces, table);
             }
             try {
-                Thread.sleep(1000); //1000 milliseconds is one second.
+                Thread.sleep(200); //1000 milliseconds is one second.
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
+            }
+            if(checkWin()){
+                board.update(pieces, table);
+                break;
             }
             change = !change;
         }

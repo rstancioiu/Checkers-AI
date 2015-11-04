@@ -1,16 +1,29 @@
 %Initialize board
 :- dynamic board/1.
 
-board([[0,1,0,1,0,1,0,1,0,1],
-       [1,0,1,0,1,0,1,0,1,0],
-       [0,1,0,1,0,1,0,1,0,1],
-       [1,0,1,0,1,0,1,0,1,0],
+/**
+board([[0,0,0,0,0,0,0,0,0,0],
        [0,0,0,0,0,0,0,0,0,0],
        [0,0,0,0,0,0,0,0,0,0],
-       [0,2,0,2,0,2,0,2,0,2],
-       [2,0,2,0,2,0,2,0,2,0],
-       [0,2,0,2,0,2,0,2,0,2],
-       [2,0,2,0,2,0,2,0,2,0]]).
+       [0,0,0,0,0,0,0,0,0,0],
+       [0,0,0,0,0,0,0,0,0,0],
+       [0,0,0,0,0,0,0,0,0,0],
+       [0,0,0,0,0,0,0,0,0,0],
+       [0,0,0,0,0,0,0,0,0,0],
+       [0,0,0,0,0,0,0,0,0,0],
+       [0,0,0,0,0,0,0,0,0,0]]).
+*/
+
+board([[0,0,0,0,0,0,0,0,0,0],
+       [0,0,0,0,0,0,0,0,0,0],
+       [0,0,0,0,0,0,0,0,0,0],
+       [0,0,0,0,0,0,0,0,0,0],
+       [0,0,0,0,0,0,0,0,0,0],
+       [0,0,0,0,0,0,0,0,0,0],
+       [0,0,0,1,0,0,0,0,0,0],
+       [0,0,0,0,0,0,0,0,0,0],
+       [0,2,0,0,0,0,0,0,0,0],
+       [4,0,0,0,0,0,0,0,0,0]]).
 
 /**
 clearboard :-
@@ -73,9 +86,7 @@ move(B,OLDX,OLDY,X,Y,NEWB) :-
 	get2D(B,OLDX,OLDY,VAL),
 	set2D(B,OLDX,OLDY,0,B2),
 	%Set the value at new position
-	set2D(B2,X,Y,VAL,B3),
-	%Turn into queen if necessary
-	check_queen(B3,X,Y,NEWB).
+	set2D(B2,X,Y,VAL,NEWB).
 
 eat(B,OLDX,OLDY,X,Y,EX,EY,NEWB) :-
 	%Kill ennemy
@@ -84,15 +95,18 @@ eat(B,OLDX,OLDY,X,Y,EX,EY,NEWB) :-
 	get2D(B2,OLDX,OLDY,VAL),
 	set2D(B2,OLDX,OLDY,0,B3),
 	%Set the value at new position
-	set2D(B3,X,Y,VAL,B4),
-	%Turn into queen if necessary
-	check_queen(B4,X,Y,NEWB).
+	set2D(B3,X,Y,VAL,NEWB).
 
 %End condition
-make_move(B,MOVE,B,C) :-
+make_move(B,MOVE,FINALB,C) :-
 	nth0(2,MOVE,POS),
 	C>0,
-	length(POS,C).
+	length(POS,C),
+	last(POS,FINALPOS),
+	nth0(0,FINALPOS,X),
+	nth0(1,FINALPOS,Y),
+	%Turn into queen if necessary
+	check_queen(B,X,Y,FINALB).
 
 %Use a move given by an IA to update the board
 make_move(B,MOVE,NEWB,C) :-
@@ -121,7 +135,9 @@ make_move(B,MOVE,NEWB,C) :-
 		;
 		nth0(0,POSI,NEWX),
 		nth0(1,POSI,NEWY),
-		move(B,X,Y,NEWX,NEWY,NEWB)
+		move(B,X,Y,NEWX,NEWY,B2),
+		C2 is C+1,
+		make_move(B2,MOVE,NEWB,C2)
 	).
 	
 %Check empty path
@@ -289,6 +305,23 @@ select_kills(LMOVES,NEWMOVES) :-
 	max_kills(LMOVES,0,0,FINALMAX),
 	findall(M,is_max_kills(M,LMOVES,FINALMAX),NEWMOVES).
 
+
+owned_by(B,P,X,Y) :-
+	get2D(B,X,Y,VAL),
+	VAL>0,
+	TMP is VAL mod 2,
+	TMP==P.
+
+check_win_player(P1) :-
+	board(B),
+	check_win(B,P1).
+
+check_win(B,P1) :-
+	P2 is 1-P1,
+	findall([X,Y],owned_by(B,P2,X,Y),L),
+	length(L,LEN),
+	LEN==0.
+
 /** ------------------------------------------------
 -----------------   RANDOM IA ----------------------
 ------------------------------------------------  */  
@@ -336,12 +369,6 @@ make_user_move(P,SX,SY,EX,EY) :-
 -------------------   MIN MAX ----------------------
 ------------------------------------------------  */
 
-owned_by(B,P,X,Y) :-
-	get2D(B,X,Y,VAL),
-	VAL>0,
-	TMP is VAL mod 2,
-	TMP==P.
-
 evaluate(B,P,E) :-
 	findall([X,Y],owned_by(B,P,X,Y),L),
 	OTHERP is 1-P,
@@ -365,16 +392,24 @@ ia_cmp(_,MOVES,_,_,_,E,MOVECUR,MOVEWIN,_,CURSOR,ECUR,_) :-
 ia_cmp(B,MOVES,P,DEPTH,Dinit,E,MOVECUR,MOVEWIN,Pinit,CURSOR,ECUR,GOAL) :-
 	nth0(CURSOR,MOVES,MOVE),
 	make_move(B,MOVE,B2,0),
-	minimax(B2,_,DEPTH,Dinit,E2,P,Pinit),
-	((call(GOAL,E2,ECUR,E2), E2\=ECUR) ->
-		NEWWIN is E2,
-		NEWMOVECUR=MOVE
+	P2 is 1-P,
+	(check_win(B2,P2) ->
+		MOVEWIN=MOVE,
+		member(E,[0,9999]),
+		call(GOAL,E,9999,E),
+		call(GOAL,E,0,E)
 		;
-		NEWWIN is ECUR,
-		NEWMOVECUR=MOVECUR
-	),
-	NEWC is CURSOR+1,
-	ia_cmp(B,MOVES,P,DEPTH,Dinit,E,NEWMOVECUR,MOVEWIN,Pinit,NEWC,NEWWIN,GOAL).
+		minimax(B2,_,DEPTH,Dinit,E2,P,Pinit),
+		((call(GOAL,E2,ECUR,E2), E2\=ECUR) ->
+			NEWWIN is E2,
+			NEWMOVECUR=MOVE
+			;
+			NEWWIN is ECUR,
+			NEWMOVECUR=MOVECUR
+		),
+		NEWC is CURSOR+1,
+		ia_cmp(B,MOVES,P,DEPTH,Dinit,E,NEWMOVECUR,MOVEWIN,Pinit,NEWC,NEWWIN,GOAL) 
+	).
 
 minimax(B,MOV,DEPTH,Dinit,E,P,Pinit):-
 	(DEPTH==0 ->
@@ -385,9 +420,9 @@ minimax(B,MOV,DEPTH,Dinit,E,P,Pinit):-
 		P2 is 1-P,
 		D2 is DEPTH-1,
 		(P==Pinit ->
-			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,_,R,Pinit,0,0,max)
+			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,_,R,Pinit,0,-1,max)
 			;
-			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,_,R,Pinit,0,9999,min)
+			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,_,R,Pinit,0,10000,min)
 		),
 		(DEPTH==Dinit ->
 			MOV=R
@@ -398,7 +433,7 @@ minimax(B,MOV,DEPTH,Dinit,E,P,Pinit):-
 
 play_minimax(P,MOVE) :-
 	board(B),
-	minimax(B,MOVE,4,4,_,P,P),
+	minimax(B,MOVE,3,3,_,P,P),
 	make_move(B,MOVE,NEWB,0),
 	retract(board(_)),
 	assert(board(NEWB)),!.
