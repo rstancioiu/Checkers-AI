@@ -54,6 +54,7 @@ public class Game implements Runnable {
         System.out.println((q1.hasSolution() ? "succeeded" : "failed"));
         initTable();
         initPieces();
+        wait(200);
         updateTablePieces();
         board = new Board(pieces, table, this);
     }
@@ -118,15 +119,20 @@ public class Game implements Runnable {
         return false;
     }
 
+    private void wait(int waiting)
+    {
+        try {
+            Thread.sleep(waiting); //1000 milliseconds is one second.
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
     public void run() {
         change = false;
         String str;
         for (;;) {
-            try {
-                Thread.sleep(100); //1000 milliseconds is one second.
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-            }
+            wait(200);
             if (change)
                 str = query1;
             else
@@ -134,6 +140,7 @@ public class Game implements Runnable {
             if (!str.equals("display_all_moves(1,MOVE)") && !str.equals("display_all_moves(0,MOVE)")) {
                 Query q = new Query(str);
                 Map<String, Term> s = q.oneSolution();
+                wait(200);
                 updateTablePieces();
                 board.update(pieces, table);
             } else {
@@ -156,6 +163,7 @@ public class Game implements Runnable {
                     }
                     System.out.println();
                 }
+                wait(200);
                 board.update(pieces, table);
                 done = new CountDownLatch(1);
                 try {
@@ -163,14 +171,11 @@ public class Game implements Runnable {
                 } catch (InterruptedException e) {
                 }
                 initTable();
+                wait(200);
                 updateTablePieces();
                 board.update(pieces, table);
             }
-            try {
-                Thread.sleep(100); //1000 milliseconds is one second.
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-            }
+            wait(200);
             if(checkWin()){
                 board.update(pieces, table);
                 break;
