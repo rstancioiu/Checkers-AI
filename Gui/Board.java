@@ -49,19 +49,19 @@ public class Board extends JFrame {
     }
 
     private void configure() {
-        black = new ImageIcon("e://Photos/black.png");
+        black = new ImageIcon("../Photos/black.png");
         Image img = black.getImage();
         Image newimgblack = img.getScaledInstance(36, 36, java.awt.Image.SCALE_SMOOTH);
         black = new ImageIcon(newimgblack);
-        white = new ImageIcon("e://Photos/white.png");
+        white = new ImageIcon("../Photos/white.png");
         img = white.getImage();
         Image newimgwhite = img.getScaledInstance(36, 36, java.awt.Image.SCALE_SMOOTH);
         white = new ImageIcon(newimgwhite);
-        whitequeen = new ImageIcon("e://Photos/white_queen.png");
+        whitequeen = new ImageIcon("../Photos/white_queen.png");
         img = whitequeen.getImage();
         Image newimgwhitequeen = img.getScaledInstance(36, 36, java.awt.Image.SCALE_SMOOTH);
         whitequeen = new ImageIcon(newimgwhitequeen);
-        blackqueen = new ImageIcon("e://Photos/black_queen.png");
+        blackqueen = new ImageIcon("../Photos/black_queen.png");
         img = blackqueen.getImage();
         Image newimgblackqueen = img.getScaledInstance(36, 36, java.awt.Image.SCALE_SMOOTH);
         blackqueen = new ImageIcon(newimgblackqueen);
