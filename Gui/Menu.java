@@ -12,7 +12,7 @@ import javax.swing.ImageIcon;
 
 public class Menu extends JFrame{
 
-    static final int SIZE=4;    
+    static final int SIZE=5;    
     JButton start;
     JButton left[]=new JButton[SIZE];
     JButton right[]=new JButton[SIZE];
@@ -32,14 +32,16 @@ public class Menu extends JFrame{
         panel.setLayout(null);
         
         start = new JButton("Start");
-        left[0] = new JButton("IA Random");
-        right[0] = new JButton("IA Random");
-        left[1] = new JButton("User");
-        right[1] = new JButton("User");
+        left[0] = new JButton("User");
+        right[0] = new JButton("User");
+        left[1] = new JButton("IA Random");
+        right[1] = new JButton("IA Random");
         left[2] = new JButton("IA MiniMax");
         right[2] = new JButton("IA MiniMax");
-        left[3] = new JButton("MiniMaxS");
-        right[3] = new JButton("MiniMaxS");
+        left[3] = new JButton("IA MiniMaxS");
+        right[3] = new JButton("IA MiniMaxS");
+        left[4] = new JButton("IA AlphaBeta");
+        right[4] = new JButton("IA AlphaBeta");
         center[0]= new JTextField(""){
             @Override public void setBorder(Border border) {
                 // No!
@@ -64,22 +66,26 @@ public class Menu extends JFrame{
 
         start.setBounds(250,560,100,50);
         start.addActionListener(new ListenerStart());
-        left[0].setBounds(20,200,120,50);
-        left[1].setBounds(20,280,120,50);
-        left[2].setBounds(20,360,120,50);
-        left[3].setBounds(20,440,120,50);
+        left[0].setBounds(20,200,110,40);
+        left[1].setBounds(20,270,110,40);
+        left[2].setBounds(20,340,110,40);
+        left[3].setBounds(20,410,110,40);
+        left[4].setBounds(20,480,110,40);
         left[0].addActionListener(new ListenerLeft());
         left[1].addActionListener(new ListenerLeft());
         left[2].addActionListener(new ListenerLeft());
         left[3].addActionListener(new ListenerLeft());
-        right[0].setBounds(460,200,120,50);
-        right[1].setBounds(460,280,120,50);
-        right[2].setBounds(460,360,120,50);
-        right[3].setBounds(460,440,120,50);
+        left[4].addActionListener(new ListenerLeft());
+        right[0].setBounds(460,200,110,40);
+        right[1].setBounds(460,270,110,40);
+        right[2].setBounds(460,340,110,40);
+        right[3].setBounds(460,410,110,40);
+        right[4].setBounds(460,480,110,40);
         right[0].addActionListener(new ListenerRight());
         right[1].addActionListener(new ListenerRight());
         right[2].addActionListener(new ListenerRight());
         right[3].addActionListener(new ListenerRight());
+        right[4].addActionListener(new ListenerRight());
         center[0].setBounds(170,330,100,60);
         center[0].setHorizontalAlignment(JTextField.CENTER);
         center[0].setEditable(false);
@@ -91,7 +97,7 @@ public class Menu extends JFrame{
         center[2].setEditable(false);
 
         Font font = center[0].getFont();
-        Font boldFont = new Font(font.getFontName(), Font.BOLD, font.getSize()+6);
+        Font boldFont = new Font(font.getFontName(), Font.BOLD, font.getSize()+4);
         center[0].setFont(boldFont);
         center[1].setFont(boldFont);
         center[2].setFont(boldFont);
@@ -121,7 +127,6 @@ public class Menu extends JFrame{
             center[2].setText(e.getActionCommand());
         }
     }
-    
     private class ListenerStart implements ActionListener{
         public void actionPerformed(ActionEvent e){
             if(!(center[0].getText().equals("") || center[2].getText().equals(""))) {

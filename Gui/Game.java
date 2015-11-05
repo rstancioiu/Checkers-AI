@@ -1,6 +1,8 @@
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+
 import org.jpl7.Atom;
 import org.jpl7.Query;
 import org.jpl7.Term;
@@ -34,16 +36,20 @@ public class Game implements Runnable {
             query1 = "display_all_moves(1,MOVE)";
         else if (player1.equals("IA MiniMax"))
             query1 = "play_minimax(2,1,MOVE)";
-        else if (player1.equals("MiniMaxS"))
+        else if (player1.equals("IA MiniMaxS"))
             query1 = "play_minimax_special(2,1,MOVE)";
+        else if (player1.equals("IA AlphaBeta"))
+            query1 = "play_minimax_alphabeta(7,1,MOVE)";
         if (player2.equals("IA Random"))
             query2 = "play_random(0,MOVE)";
         else if (player2.equals("User"))
             query2 = "display_all_moves(0,MOVE)";
         else if (player2.equals("IA MiniMax"))
             query2 = "play_minimax(2,0,MOVE)";
-        else if (player2.equals("MiniMaxS"))
+        else if (player2.equals("IA MiniMaxS"))
             query2 = "play_minimax_special(2,0,MOVE)";
+        else if (player1.equals("IA AlphaBeta"))
+            query1 = "play_minimax_alphabeta(7,0,MOVE)";
     }
 
     public void set_mother(Thread m) {
@@ -177,10 +183,12 @@ public class Game implements Runnable {
                 str = query2;
             if (!str.equals("display_all_moves(1,MOVE)") && !str.equals("display_all_moves(0,MOVE)")) {
                 Query q = new Query(str);
-                Map<String, Term> s = q.oneSolution();
-                String st = s.get("MOVE").toString();
-                System.out.println(str);
-                make_move(st);
+                while (q.hasMoreSolutions()) {
+                    Map<String, Term> s = q.nextSolution();
+                    String st = s.get("MOVE").toString();
+                    System.out.println(str);
+                    make_move(st);
+                }
             } else {
                 {
                     Query q = new Query(str);
