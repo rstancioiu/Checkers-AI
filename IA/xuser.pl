@@ -24,7 +24,7 @@ user_move(M,EX,EY,LIST) :-
 	EY==EYP,
 	M=MOVE.
 
-make_user_move(P,SX,SY,EX,EY) :-
+make_user_move(P,SX,SY,EX,EY,MOVE) :-
 	board(B),
 	findall([SX,SY,L1,L2],possible(B,P,SX,SY,L1,L2,0),LMOVES),
 	select_kills(LMOVES,MOVES),

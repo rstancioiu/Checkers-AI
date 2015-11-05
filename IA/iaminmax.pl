@@ -3,7 +3,8 @@
 ------------------------------------------------  */
 
 :-  module(iaminmax,[play_minimax/3,
-					 play_minimax_special/3
+					 play_minimax_special/3,
+					 play_minimax_alphabeta/3
 					 ]).
 :-  use_module(utility).
 
@@ -136,6 +137,87 @@ play_minimax(D,P,MOVE) :-
 play_minimax_special(D,P,MOVE) :-
 	board(B),
 	minimax_special(B,MOVE,D,D,_,P,P),
+	make_move(B,MOVE,NEWB,0),
+	retract(board(_)),
+	assert(board(NEWB)),!.
+
+
+
+
+%End condition
+ia_cmp_alphabeta(_,MOVES,_,_,_,E,MOVECUR,MOVEWIN,_,CURSOR,ECUR,_,_,_,_) :-
+	CURSOR>0,
+	length(MOVES,CURSOR),
+	E=ECUR,
+	MOVEWIN=MOVECUR.
+
+ia_cmp_alphabeta(B,MOVES,P,DEPTH,Dinit,E,MOVECUR,MOVEWIN,Pinit,CURSOR,ECUR,GOAL,EQ,ALPHA,BETA) :-
+	nth0(CURSOR,MOVES,MOVE),
+	make_move(B,MOVE,B2,0),
+	P2 is 1-P,
+	(check_win(B2,P2) ->
+		MOVEWIN=MOVE,
+		member(E,[-9999,9999]),
+		call(GOAL,E,9999,E),
+		call(GOAL,E,-9999,E)
+		;
+		minimax_alphabeta(B2,_,DEPTH,Dinit,E2,P,Pinit,ALPHA,BETA),
+		((call(GOAL,E2,ECUR,E2)) ->
+			(E2==ECUR ->
+				NEWWIN is E2,
+				EQ1 is EQ+1,
+				X is random(EQ1),
+				(X==0 ->
+					NEWMOVECUR=MOVE;
+					NEWMOVECUR=MOVECUR
+				)
+				;
+				NEWWIN is E2,
+				NEWMOVECUR=MOVE,
+				EQ1 is 1
+			);
+			EQ1 is EQ,
+			NEWWIN is ECUR,
+			NEWMOVECUR=MOVECUR
+		),
+		(call(GOAL,0,1,0) ->
+			ALPHA2 is max(ALPHA,NEWWIN),
+			BETA2 is BETA;
+			BETA2 is min(BETA,NEWWIN),
+			ALPHA2 is ALPHA
+		),
+		(ALPHA2<BETA2 ->
+			NEWC is CURSOR+1,
+			ia_cmp_alphabeta(B,MOVES,P,DEPTH,Dinit,E,NEWMOVECUR,MOVEWIN,Pinit,NEWC,NEWWIN,GOAL,EQ1,ALPHA2,BETA2);
+			MOVEWIN=MOVE
+		)
+	).
+
+
+minimax_alphabeta(B,MOV,DEPTH,Dinit,E,P,Pinit,ALPHA,BETA):-
+	(DEPTH==0 ->
+		evaluate(B,Pinit,E)
+		;
+		findall([PX,PY,L1,L2],possible(B,P,PX,PY,L1,L2,0),LMOVES),
+		select_kills(LMOVES,NEWMOVES),
+		P2 is 1-P,
+		D2 is DEPTH-1,
+		(P==Pinit ->
+			ia_cmp_alphabeta(B,NEWMOVES,P2,D2,Dinit,E,_,R,Pinit,0,-10000,max,0,ALPHA,BETA)
+			;
+			ia_cmp_alphabeta(B,NEWMOVES,P2,D2,Dinit,E,_,R,Pinit,0,10000,min,0,ALPHA,BETA)
+		),
+		(DEPTH==Dinit ->
+			MOV=R
+			;
+			true
+		)
+).
+
+
+play_minimax_alphabeta(D,P,MOVE) :-
+	board(B),
+	minimax_alphabeta(B,MOVE,D,D,_,P,P,-9999,9999),
 	make_move(B,MOVE,NEWB,0),
 	retract(board(_)),
 	assert(board(NEWB)),!.
