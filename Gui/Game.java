@@ -34,7 +34,7 @@ public class Game implements Runnable {
             query1 = "display_all_moves(1,MOVE)";
         else if (player1.equals("IA MiniMax"))
             query1 = "play_minimax(2,1,MOVE)";
-        else if (player1.equals("IA MiniMaxS"))
+        else if (player1.equals("MiniMaxS"))
             query1 = "play_minimax_special(2,1,MOVE)";
         if (player2.equals("IA Random"))
             query2 = "play_random(0,MOVE)";
@@ -42,7 +42,7 @@ public class Game implements Runnable {
             query2 = "display_all_moves(0,MOVE)";
         else if (player2.equals("IA MiniMax"))
             query2 = "play_minimax(2,0,MOVE)";
-        else if (player2.equals("IA MiniMaxS"))
+        else if (player2.equals("MiniMaxS"))
             query2 = "play_minimax_special(2,0,MOVE)";
     }
 
@@ -167,7 +167,7 @@ public class Game implements Runnable {
     }
 
     public void run() {
-        turn = false;
+        turn = true;
         String str;
         for (;;) {
             wait(1000);
