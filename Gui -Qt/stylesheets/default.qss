@@ -1,6 +1,0 @@
-QTableView{
-	selection-background-color: red;
-    border-radius: 5px 5px 5px 5px;
-   	border: 3px outset black;
-   	gridline-color: 1px solid black;
-}
