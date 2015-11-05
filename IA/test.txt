@@ -1,3 +1,0 @@
-set path=C:\Program Files\swipl64\bin;%path%;C:\Program Files\Java\jdk1.7.0_79\bin;
-javac -cp "C:\Program Files\swipl64\lib\jpl.jar;." Board.java Game.java Menu.java Main.java
-java -cp "C:\Program Files\swipl64\lib\jpl.jar;." Main
