@@ -12,14 +12,16 @@ import org.jpl7.Term;
 
 public class Game implements Runnable {
     private CountDownLatch done;
-    static final int N = 10;
+    private static final int N = 10;
+    private static final int M = 1024;
     private String player1;
     private String player2;
     private boolean loop;
-    private boolean change;
+    private boolean turn;
     private String query1, query2;
     private int[][] pieces = new int[N][N];
     private int[][] table = new int[N][N];
+    private int[] moves = new int[M];
     private Board board;
 
     public Game(String player1, String player2) {
@@ -50,7 +52,7 @@ public class Game implements Runnable {
 
     private void start() {
         Query q1 = new Query("consult", new Term[] {
-                             new Atom("../IA/main.pl") });
+                             new Atom("C:\\cygwin64\\home\\Afkid\\GitHub\\Game_prolog\\IA\\board.pl") });
         System.out.println((q1.hasSolution() ? "succeeded" : "failed"));
         initTable();
         initPieces();
@@ -65,7 +67,7 @@ public class Game implements Runnable {
                 table[i][j] = (i + j) % 2;
     }
 
-    private void initPieces(){
+    private void initPieces() {
         String t1 = "init";
         Query q1 = new Query(t1);
         System.out.println((q1.hasSolution() ? "Init realised" : "Init failed"));
@@ -87,31 +89,31 @@ public class Game implements Runnable {
         }
     }
 
-    private boolean checkWin(){
-        String win1="check_win_player(0)"; //black
-        String win2="check_win_player(1)"; //white
+    private boolean checkWin() {
+        String win1 = "check_win_player(0)"; //black
+        String win2 = "check_win_player(1)"; //white
         Query q1 = new Query(win1);
         Query q2 = new Query(win2);
-        if(q1.hasSolution()){
+        if (q1.hasSolution()) {
             System.out.println("Player black won");
-            for(int i=0;i<N;++i){
-                for(int j=0;j<N;++j){
-                    if(pieces[i][j]==2 || pieces[i][j]==4)
-                        table[i][j]=2;
+            for (int i = 0; i < N; ++i) {
+                for (int j = 0; j < N; ++j) {
+                    if (pieces[i][j] == 2 || pieces[i][j] == 4)
+                        table[i][j] = 2;
                     else
-                        table[i][j]=(i+j)%2;
+                        table[i][j] = (i + j) % 2;
                 }
             }
             return true;
         }
-        if(q2.hasSolution()){
+        if (q2.hasSolution()) {
             System.out.println("Player white won");
-            for(int i=0;i<N;++i){
-                for(int j=0;j<N;++j){
-                    if(pieces[i][j]==1 || pieces[i][j]==3)
-                        table[i][j]=2;
+            for (int i = 0; i < N; ++i) {
+                for (int j = 0; j < N; ++j) {
+                    if (pieces[i][j] == 1 || pieces[i][j] == 3)
+                        table[i][j] = 2;
                     else
-                        table[i][j]=(i+j)%2;
+                        table[i][j] = (i + j) % 2;
                 }
             }
             return true;
@@ -119,8 +121,7 @@ public class Game implements Runnable {
         return false;
     }
 
-    private void wait(int waiting)
-    {
+    private void wait(int waiting) {
         try {
             Thread.sleep(waiting); //1000 milliseconds is one second.
         } catch (InterruptedException ex) {
@@ -128,72 +129,111 @@ public class Game implements Runnable {
         }
     }
 
+    private int make_move(String st) {
+        int a = 0, b = 0, cnt = 0;
+        for (int i = 0; i < st.length(); ++i) {
+            if (st.charAt(i) >= '0' && st.charAt(i) <= '9') {
+                moves[cnt++] = st.charAt(i) - '0';
+            }
+        }
+        for(int i=0;i<cnt;++i)
+            System.out.print(moves[i]+" ");
+        System.out.println();
+        initTable();
+        cnt /= 2;
+        if (cnt == 2) {
+            pieces[moves[3]][moves[2]] = pieces[moves[1]][moves[0]];
+            pieces[moves[1]][moves[0]] = 0;
+            wait(500);
+            board.update(pieces, table);
+            wait(500);
+        } else {
+            int p = cnt / 2;
+            for (int i = 0; i < p; ++i) {
+                pieces[moves[(i + 1) * 2 + 1]][moves[(i + 1) * 2]] = pieces[moves[i * 2 + 1]][moves[2 * i]];
+                pieces[moves[i * 2 + 1]][moves[2 * i]] = 0;
+                pieces[moves[(i + p + 1) * 2 + 1]][moves[(i + p + 1) * 2]] = 0;
+                wait(500);
+                board.update(pieces, table);
+                wait(500);
+            }
+        }
+        updateTablePieces();
+        board.update(pieces, table);
+        return cnt;
+    }
+
     public void run() {
-        change = false;
+        turn = false;
         String str;
         for (;;) {
-            wait(200);
-            if (change)
+            wait(1000);
+            if (turn)
                 str = query1;
             else
                 str = query2;
             if (!str.equals("display_all_moves(1,MOVE)") && !str.equals("display_all_moves(0,MOVE)")) {
                 Query q = new Query(str);
                 Map<String, Term> s = q.oneSolution();
-                wait(200);
-                updateTablePieces();
-                board.update(pieces, table);
+                String st = s.get("MOVE").toString();
+                System.out.println(str);
+                make_move(st);
             } else {
-                Query q = new Query(str);
-                while (q.hasMoreSolutions()) {
-                    Map<String, Term> s = q.nextSolution();
-                    String st = s.get("MOVE").toString();
-                    int a = 0, b = 0, cnt = 0;
-                    for (int i = 0; i < st.length(); ++i) {
-                        if (st.charAt(i) >= '0' && st.charAt(i) <= '9') {
-                            if (cnt == 0)
-                                a = st.charAt(i) - '0';
-                            else if (cnt == 1) {
-                                b = st.charAt(i) - '0';
-                                table[b][a] = 2;
-                                System.out.print(a+" "+b+"   ");
+                {
+                    Query q = new Query(str);
+                    while (q.hasMoreSolutions()) {
+                        Map<String, Term> s = q.nextSolution();
+                        String st = s.get("MOVE").toString();
+                        int a = 0, b = 0, cnt = 0;
+                        for (int i = 0; i < st.length(); ++i) {
+                            if (st.charAt(i) >= '0' && st.charAt(i) <= '9') {
+                                if (cnt == 0)
+                                    a = st.charAt(i) - '0';
+                                else if (cnt == 1) {
+                                    b = st.charAt(i) - '0';
+                                    table[b][a] = 2;
+                                    System.out.print(a + " " + b + "   ");
+                                }
+                                cnt = (cnt + 1) % 2;
                             }
-                            cnt = (cnt + 1) % 2;
                         }
+                        System.out.println();
                     }
-                    System.out.println();
+                    wait(1000);
+                    board.update(pieces, table);
+                    done = new CountDownLatch(1);
+                    try {
+                        loop = done.await(30, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                    }
                 }
-                wait(200);
-                board.update(pieces, table);
-                done = new CountDownLatch(1);
-                try {
-                    loop = done.await(30, TimeUnit.SECONDS);
-                } catch (InterruptedException e) {
-                }
-                initTable();
-                wait(200);
-                updateTablePieces();
-                board.update(pieces, table);
             }
             wait(200);
-            if(checkWin()){
+            if (checkWin()) {
                 board.update(pieces, table);
                 break;
             }
-            change = !change;
+            turn = !turn;
         }
     }
 
-    public void sendQuery(int sx,int sy,int ex,int ey){
+    public void sendQuery(int sx, int sy, int ex, int ey) {
         String str;
-        if(change){
-            str="make_user_move(1,"+sx+","+sy+","+ex+","+ey+")";
-        }else{
-            str="make_user_move(0,"+sx+","+sy+","+ex+","+ey+")";
-        }
+        if (turn && player1.equals("User")) {
+            str = "make_user_move(1," + sx + "," + sy + "," + ex + "," + ey + ",MOVE)";
+        } else if(player2.equals("User")){
+            str = "make_user_move(0," + sx + "," + sy + "," + ex + "," + ey + ",MOVE)";
+        } else return;
+
         Query q = new Query(str);
-        Map<String, Term> s = q.oneSolution();
-        System.out.println("sent");
-        done.countDown();
+        while (q.hasMoreSolutions()) {
+            Map<String, Term> s = q.nextSolution();
+            String st = s.get("MOVE").toString();
+            if(make_move(st)>0)
+            {
+                System.out.println("sent");
+                done.countDown();
+            }
+        }
     }
 }

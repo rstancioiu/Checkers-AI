@@ -21,7 +21,7 @@ public class Board extends JFrame {
     private JLabel[] labelsBlack = new JLabel[20];
     private ImageIcon black, white,whitequeen,blackqueen;
     private JPanel canvasBoard;
-    private boolean clicked;
+    private int clicked;
     private Point start,end;
     Map<Integer, Integer> map = new HashMap<Integer, Integer>();
     private int[][] table,pieces;
@@ -31,7 +31,7 @@ public class Board extends JFrame {
         this.table = table;
         this.pieces= pieces;
         this.game=game;
-        clicked=false;
+        clicked=0;
         configure();
         createAndShowGUI(); 
     }
@@ -49,19 +49,19 @@ public class Board extends JFrame {
     }
 
     private void configure() {
-        black = new ImageIcon("../Photos/black.png");
+        black = new ImageIcon("e://Photos/black.png");
         Image img = black.getImage();
         Image newimgblack = img.getScaledInstance(36, 36, java.awt.Image.SCALE_SMOOTH);
         black = new ImageIcon(newimgblack);
-        white = new ImageIcon("../Photos/white.png");
+        white = new ImageIcon("e://Photos/white.png");
         img = white.getImage();
         Image newimgwhite = img.getScaledInstance(36, 36, java.awt.Image.SCALE_SMOOTH);
         white = new ImageIcon(newimgwhite);
-        whitequeen = new ImageIcon("../Photos/white_queen.png");
+        whitequeen = new ImageIcon("e://Photos/white_queen.png");
         img = whitequeen.getImage();
         Image newimgwhitequeen = img.getScaledInstance(36, 36, java.awt.Image.SCALE_SMOOTH);
         whitequeen = new ImageIcon(newimgwhitequeen);
-        blackqueen = new ImageIcon("../Photos/black_queen.png");
+        blackqueen = new ImageIcon("e://Photos/black_queen.png");
         img = blackqueen.getImage();
         Image newimgblackqueen = img.getScaledInstance(36, 36, java.awt.Image.SCALE_SMOOTH);
         blackqueen = new ImageIcon(newimgblackqueen);
@@ -86,7 +86,7 @@ public class Board extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 Point p = e.getPoint();
                 int x = 40,y = 20,distx = 50,disty = 50;
-                if(clicked){
+                if(clicked>=1){
                     end=p;
                     int sx=(int)((start.getX()-x)/distx);
                     int sy=(int)((-start.getY()+520)/disty);
@@ -95,12 +95,12 @@ public class Board extends JFrame {
                     System.out.println(sx+" "+sy+" "+ex+" "+ey);
                     if(sx!=sy || ex!=ey)
                     game.sendQuery(sx,sy,ex,ey);
+                    start=end;
                 }
                 else{
                     start=p;
                 }
-                clicked=!clicked;
-                System.out.println(p.getX() + " "+ p.getY());
+                clicked++;
             }
         });
         getContentPane().add(canvasBoard);
