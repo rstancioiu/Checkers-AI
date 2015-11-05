@@ -50,7 +50,7 @@ public class Game implements Runnable {
 
     private void start() {
         Query q1 = new Query("consult", new Term[] {
-                             new Atom("C:\\cygwin64\\home\\Afkid\\GitHub\\Game_prolog\\IA\\board.pl") });
+                             new Atom("../IA/main.pl") });
         System.out.println((q1.hasSolution() ? "succeeded" : "failed"));
         initTable();
         initPieces();
