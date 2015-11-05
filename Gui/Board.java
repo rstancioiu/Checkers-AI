@@ -1,14 +1,15 @@
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-
+import java.awt.event.MouseMotionListener;
 import java.util.HashMap;
 import java.util.Map;
-
+import javax.swing.JOptionPane;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -41,6 +42,13 @@ public class Board extends JFrame {
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                game.m.stop();
+            }
+        });
+
         addComponentsToPane();
 
         setSize(600, 600);
@@ -69,6 +77,26 @@ public class Board extends JFrame {
 
     private void addComponentsToPane() {
         canvasBoard=new CanvasBoard();
+        canvasBoard.addMouseMotionListener(new MouseMotionListener() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                Point p = e.getPoint();
+                int x = 40,y = 20,distx = 50,disty = 50;
+                int ex=(int)((p.getX()-x)/distx);
+                int ey=(int)((-p.getY()+520)/disty);
+                if(ex>=0 && ex<=9 && ey>=0 && ey<=9){
+                    if(pieces[ey][ex]!=0){
+                        Cursor cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
+                        setCursor(cursor);
+                    } else {
+                        Cursor cursor = Cursor.getDefaultCursor();
+                        setCursor(cursor);
+                    }
+                }
+            }
+            @Override
+            public void mouseDragged(MouseEvent e) {}
+        });
         canvasBoard.addMouseListener(new MouseListener() {
             @Override
             public void mouseReleased(MouseEvent e) {
@@ -94,7 +122,7 @@ public class Board extends JFrame {
                     int ey=(int)((-end.getY()+520)/disty);
                     System.out.println(sx+" "+sy+" "+ex+" "+ey);
                     if(sx!=sy || ex!=ey)
-                    game.sendQuery(sx,sy,ex,ey);
+                        game.sendQuery(sx,sy,ex,ey);
                     start=end;
                 }
                 else{

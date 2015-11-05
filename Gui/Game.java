@@ -1,14 +1,9 @@
-
 import java.util.Map;
-
 import java.util.concurrent.CountDownLatch;
-
 import java.util.concurrent.TimeUnit;
-
 import org.jpl7.Atom;
 import org.jpl7.Query;
 import org.jpl7.Term;
-
 
 public class Game implements Runnable {
     private CountDownLatch done;
@@ -23,6 +18,7 @@ public class Game implements Runnable {
     private int[][] table = new int[N][N];
     private int[] moves = new int[M];
     private Board board;
+    public Thread m;
 
     public Game(String player1, String player2) {
         this.player1 = player1;
@@ -48,6 +44,10 @@ public class Game implements Runnable {
             query2 = "play_minimax(2,0,MOVE)";
         else if (player2.equals("IA MiniMaxS"))
             query2 = "play_minimax_special(2,0,MOVE)";
+    }
+
+    public void set_mother(Thread m) {
+        this.m = m;
     }
 
     private void start() {
@@ -123,22 +123,25 @@ public class Game implements Runnable {
 
     private void wait(int waiting) {
         try {
-            Thread.sleep(waiting); //1000 milliseconds is one second.
+            Thread.sleep(waiting/4); //1000 milliseconds is one second.
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
     }
 
     private int make_move(String st) {
+        System.out.println("Drawing MOVE : " + st);
         int a = 0, b = 0, cnt = 0;
         for (int i = 0; i < st.length(); ++i) {
             if (st.charAt(i) >= '0' && st.charAt(i) <= '9') {
                 moves[cnt++] = st.charAt(i) - '0';
             }
         }
+        System.out.println("---------");
         for(int i=0;i<cnt;++i)
             System.out.print(moves[i]+" ");
         System.out.println();
+        System.out.println("---------");
         initTable();
         cnt /= 2;
         if (cnt == 2) {

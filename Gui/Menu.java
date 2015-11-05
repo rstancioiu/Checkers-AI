@@ -109,7 +109,9 @@ public class Menu extends JFrame{
     private class ListenerStart implements ActionListener{
         public void actionPerformed(ActionEvent e){
             if(!(center[0].getText().equals("") || center[2].getText().equals(""))) {
-                Thread game=new Thread(new Game(center[0].getText(),center[2].getText()));
+                Game runnable = new Game(center[0].getText(),center[2].getText());
+                Thread game=new Thread(runnable);
+                runnable.set_mother(game);
                 game.start();
             }
         }

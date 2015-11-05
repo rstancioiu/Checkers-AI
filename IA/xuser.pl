@@ -3,7 +3,7 @@
 ------------------------------------------------  */ 
 
 :-  module(xuser,[display_all_moves/2,
-				 make_user_move/5
+				 make_user_move/6
 				]).
 :-  use_module(utility).
 
