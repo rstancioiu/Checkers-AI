@@ -23,15 +23,15 @@ init :-
 		init
 		;
 		assert(board([[0,1,0,1,0,1,0,1,0,1],
-			          [1,0,1,0,1,0,1,0,1,0],
-			          [0,1,0,1,0,1,0,1,0,1],
-			          [1,0,1,0,1,0,1,0,1,0],
-			          [0,0,0,0,0,0,0,0,0,0],
-			          [0,0,0,0,0,0,0,0,0,0],
-			          [0,2,0,2,0,2,0,2,0,2],
-			          [2,0,2,0,2,0,2,0,2,0],
-			          [0,2,0,2,0,2,0,2,0,2],
-			          [2,0,2,0,2,0,2,0,2,0]]))
+	          		 [1,0,1,0,1,0,1,0,1,0],
+	         		 [0,1,0,1,0,1,0,1,0,1],
+	         		 [1,0,1,0,1,0,1,0,1,0],
+	         		 [0,0,0,0,0,0,0,0,0,0],
+	         		 [0,0,0,0,0,0,0,0,0,0],
+	         		 [0,2,0,2,0,2,0,2,0,2],
+	         		 [2,0,2,0,2,0,2,0,2,0],
+	         		 [0,2,0,2,0,2,0,2,0,2],
+	         		 [2,0,2,0,2,0,2,0,2,0]]))
 	).
 	
 /** Backup : an empty board and the initial board
@@ -322,6 +322,13 @@ owned_by(B,P,X,Y) :-
 	TMP is VAL mod 2,
 	TMP==P.
 
+pawns_owned_by(B,P,X,Y) :-
+	get2D(B,X,Y,VAL),
+	VAL<3,
+	VAL>0,
+	TMP is VAL mod 2,
+	TMP==P.
+
 queens_owned_by(B,P,X,Y) :-
 	get2D(B,X,Y,VAL),
 	VAL>2,
@@ -338,6 +345,16 @@ check_win(B,P1) :-
 	findall([PX,PY,L1,L2],possible(B,P2,PX,PY,L1,L2,0),L),
 	length(L,LEN),
 	LEN==0.
+
+check_draw :-
+	board(B),
+	findall([X,Y],owned_by(B,0,X,Y),L1),
+	findall([X,Y],queens_owned_by(B,0,X,Y),QL1),
+	findall([X,Y],owned_by(B,1,X,Y),L2),
+	findall([X,Y],queens_owned_by(B,1,X,Y),QL2),
+	length(L1,LEN1),length(L2,LEN2),length(QL1,LENQ1),length(QL2,LENQ2),
+	((LEN1==1,LEN2==1,LENQ1==1,LENQ2==1);(LEN1==2,LEN2==1,LENQ1==2,LENQ2==1);
+		(LEN1==1,LEN2==2,LENQ1==1,LENQ2==2)).
 
 /** ------------------------------------------------
 -----------------   RANDOM IA ----------------------
@@ -389,18 +406,26 @@ make_user_move(P,SX,SY,EX,EY) :-
 
 evaluate_special(BF,P,E) :-
 	board(B),
-	findall([X,Y],owned_by(B,P,X,Y),L1),
-	findall([X,Y],owned_by(BF,P,X,Y),L3),
+	findall([Y],pawns_owned_by(B,P,X,Y),L1),
+	findall([Y],pawns_owned_by(BF,P,X,Y),L3),
 	findall([X,Y],queens_owned_by(B,P,X,Y),QL1),
 	findall([X,Y],queens_owned_by(BF,P,X,Y),QL3),
 	OTHERP is 1-P,
-	findall([X,Y],owned_by(B,OTHERP,X,Y),L2),
-	findall([X,Y],owned_by(BF,OTHERP,X,Y),L4),
+	findall([Y],pawns_owned_by(B,OTHERP,X,Y),L2),
+	findall([Y],pawns_owned_by(BF,OTHERP,X,Y),L4),
 	findall([X,Y],queens_owned_by(B,OTHERP,X,Y),QL2),
 	findall([X,Y],queens_owned_by(BF,OTHERP,X,Y),QL4),
-	length(L1,NBP1),length(L2,NBP2),length(L3,NBP3),length(L4,NBP4),
+	sum(L1,NBPA1),sum(L2,NBPA2),sum(L3,NBPA3),sum(L4,NBPA4),
 	length(QL1,NBQ1),length(QL2,NBQ2),length(QL3,NBQ3),length(QL4,NBQ4),
-	E is ((NBP4+NBP1-NBP2-NBP3)+(NBQ4+NBQ1-NBQ2-NBQ3)*2).
+	((P==0) ->
+		length(L1,LEN1),LEN1_AUX=9*LEN1,NBP1_AUX=LEN1_AUX-NBPA1,NBP1 is NBP1_AUX,
+		length(L2,LEN2),LEN2_AUX=9*LEN2,NBP2_AUX=LEN2_AUX-NBPA2,NBP2 is NBP2_AUX,
+		length(L3,LEN3),LEN3_AUX=9*LEN3,NBP3_AUX=LEN3_AUX-NBPA3,NBP3 is NBP3_AUX,
+		length(L4,LEN4),LEN4_AUX=9*LEN4,NBP4_AUX=LEN4_AUX-NBPA4,NBP4 is NBP4_AUX
+		;
+		NBP1 is NBPA1,NBP2 is NBPA2,NBP3 is NBPA3,NBP4 is NBPA4
+	)
+	,E is ((NBP4+NBP1-NBP2-NBP3)+(NBQ4+NBQ1-NBQ2-NBQ3)*25).
 
 evaluate(B,P,E) :-
 	findall([X,Y],owned_by(B,P,X,Y),L),
@@ -416,13 +441,13 @@ min(X,Y,Y) :- X >= Y.
 min(X,Y,X) :- X<Y.
 
 %End condition
-ia_cmp(_,MOVES,_,_,_,E,MOVECUR,MOVEWIN,_,CURSOR,ECUR,_) :-
+ia_cmp(_,MOVES,_,_,_,E,MOVECUR,MOVEWIN,_,CURSOR,ECUR,_,_) :-
 	CURSOR>0,
 	length(MOVES,CURSOR),
 	E=ECUR,
 	MOVEWIN=MOVECUR.
 
-ia_cmp(B,MOVES,P,DEPTH,Dinit,E,MOVECUR,MOVEWIN,Pinit,CURSOR,ECUR,GOAL) :-
+ia_cmp(B,MOVES,P,DEPTH,Dinit,E,MOVECUR,MOVEWIN,Pinit,CURSOR,ECUR,GOAL,EQ) :-
 	nth0(CURSOR,MOVES,MOVE),
 	make_move(B,MOVE,B2,0),
 	P2 is 1-P,
@@ -433,15 +458,26 @@ ia_cmp(B,MOVES,P,DEPTH,Dinit,E,MOVECUR,MOVEWIN,Pinit,CURSOR,ECUR,GOAL) :-
 		call(GOAL,E,-9999,E)
 		;
 		minimax(B2,_,DEPTH,Dinit,E2,P,Pinit),
-		((call(GOAL,E2,ECUR,E2), E2\=ECUR) ->
-			NEWWIN is E2,
-			NEWMOVECUR=MOVE
-			;
+		((call(GOAL,E2,ECUR,E2)) ->
+			(E2==ECUR ->
+				NEWWIN is E2,
+				EQ1 is EQ+1,
+				X is random(EQ1),
+				(X==0 ->
+					NEWMOVECUR=MOVE;
+					NEWMOVECUR=MOVECUR
+				)
+				;
+				NEWWIN is E2,
+				NEWMOVECUR=MOVE,
+				EQ1 is 1
+			);
+			EQ1 is EQ,
 			NEWWIN is ECUR,
 			NEWMOVECUR=MOVECUR
 		),
 		NEWC is CURSOR+1,
-		ia_cmp(B,MOVES,P,DEPTH,Dinit,E,NEWMOVECUR,MOVEWIN,Pinit,NEWC,NEWWIN,GOAL) 
+		ia_cmp(B,MOVES,P,DEPTH,Dinit,E,NEWMOVECUR,MOVEWIN,Pinit,NEWC,NEWWIN,GOAL,EQ1) 
 	).
 
 minimax(B,MOV,DEPTH,Dinit,E,P,Pinit):-
@@ -453,9 +489,9 @@ minimax(B,MOV,DEPTH,Dinit,E,P,Pinit):-
 		P2 is 1-P,
 		D2 is DEPTH-1,
 		(P==Pinit ->
-			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,_,R,Pinit,0,-10000,max)
+			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,_,R,Pinit,0,-10000,max,0)
 			;
-			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,_,R,Pinit,0,10000,min)
+			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,_,R,Pinit,0,10000,min,0)
 		),
 		(DEPTH==Dinit ->
 			MOV=R
@@ -473,9 +509,9 @@ minimax_special(B,MOV,DEPTH,Dinit,E,P,Pinit):-
 		P2 is 1-P,
 		D2 is DEPTH-1,
 		(P==Pinit ->
-			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,_,R,Pinit,0,-10000,max)
+			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,_,R,Pinit,0,-10000,max,0)
 			;
-			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,_,R,Pinit,0,10000,min)
+			ia_cmp(B,NEWMOVES,P2,D2,Dinit,E,_,R,Pinit,0,10000,min,0)
 		),
 		(DEPTH==Dinit ->
 			MOV=R
@@ -508,59 +544,74 @@ versus(PRANDOM,TOUR,WIN,IA0,IA1) :-
 		;
 		call(IA1,1,_)
 	),
-	(check_win_player(PRANDOM) ->
-		WIN=PRANDOM
-		;
-		PNEXT is 1-PRANDOM,
-		TOURNEXT is TOUR+1,
-		versus(PNEXT,TOURNEXT,WIN,IA0,IA1)
+	(check_draw ->
+		WIN is -1;
+		(check_win_player(PRANDOM) ->
+			WIN=PRANDOM
+			;
+			PNEXT is 1-PRANDOM,
+			TOURNEXT is TOUR+1,
+			versus(PNEXT,TOURNEXT,WIN,IA0,IA1)
+		)
 	).
 
 %End condition
-test_versus(COUNTER,WIN_MINMAX,NB,_,_,WFINAL) :-
+test_versus(COUNTER,WIN_MINMAX,NB,_,_,WFINAL,D_MINMAX,D) :-
 	COUNTER==NB,
+	D=D_MINMAX,
+	write(NB),
 	WFINAL=WIN_MINMAX,!.
 
 %Loop
-test_versus(COUNTER,WIN_MINMAX,NB,IA0,IA1,WFINAL) :-
+test_versus(COUNTER,WIN_MINMAX,NB,IA0,IA1,WFINAL,D_MINMAX,D) :-
 	COUNTER>=0,
 	COUNTER<NB,
 	init,
 	versus(0,0,W,IA0,IA1),
 	write(COUNTER),write('-'),flush_output,
-	WIN_MINMAX2 is WIN_MINMAX+W,
-	COUNTER2 is COUNTER+1,
-	test_versus(COUNTER2,WIN_MINMAX2,NB,IA0,IA1,WFINAL).
+	( (W>=0) ->
+		WIN_MINMAX2 is WIN_MINMAX+W,
+		COUNTER2 is COUNTER+1,
+		D_MINMAX2 is D_MINMAX
+		;
+		WIN_MINMAX2 is WIN_MINMAX,
+		D_MINMAX2 is D_MINMAX+1,
+		COUNTER2 is COUNTER+1
+	),
+	test_versus(COUNTER2,WIN_MINMAX2,NB,IA0,IA1,WFINAL,D_MINMAX2,D).
 
 random_vs_random(NB) :-
 	nl,write(" --- TEST Random VS Random --- "),nl,
 	write("Number of games : "),write(NB),nl,nl,
 	write("Progress : "),
-	test_versus(0,0,NB,play_random,play_random,W),
-	nl,nl,write("Balance : "),write(W),write("/"),write(NB),nl,
+	test_versus(0,0,NB,play_random,play_random,W ,0, D),
+	nl,nl,write("Balance : "),write(W),write("/"),write(NB-D),nl,
+	nl,nl,write("Games drawn : "),write(D),nl,
 	write(" --- TEST finished --- "),nl,nl,!.
 
 minmax_vs_random(NB) :-
 	nl,write(" --- TEST MinMax2 VS Random --- "),nl,
 	write("Number of games : "),write(NB),nl,nl,
 	write("Progress : "),
-	test_versus(0,0,NB,play_random,play_minimax(2),W),
+	test_versus(0,0,NB,play_random,play_minimax(2),W,0, D),
 	nl,nl,write("Games won by MinMax2 : "),write(W),write("/"),write(NB),nl,
+	nl,nl,write("Games drawn : "),write(D),nl,
 	write(" --- TEST finished --- "),nl,nl,!.
 
 minmax_vs_minmax(NB) :-
-	nl,write(" --- TEST MinMax2 VS MinMax1 --- "),nl,
+	nl,write(" --- TEST MinMax2 VS MinMax2 --- "),nl,
 	write("Number of games : "),write(NB),nl,nl,
 	write("Progress : "),
-	test_versus(0,0,NB,play_minimax(1),play_minimax(2),W),
-	nl,nl,write("Games won by Minimax2 : "),
-	write(W),write("/"),write(NB),nl,	
+	test_versus(0,0,NB,play_minimax(2),play_minimax(2),W, 0, D),
+	nl,nl,write("Games won by Minimax2 : "),write(W),write("/"),write(NB),nl,
+	nl,nl,write("Games drawn : "),write(D),nl,	
 	write(" --- TEST finished --- "),nl,nl,!.
 
 minmaxspecial_vs_minmax(NB) :-
-	nl,write(" --- TEST MinMaxSpecial2 VS MinMax1 --- "),nl,
+	nl,write(" --- TEST MinMaxSpecial2 VS MinMax2 --- "),nl,
 	write("Number of games : "),write(NB),nl,nl,
 	write("Progress : "),
-	test_versus(0,0,NB,play_minimax_special(3),play_minimax(3),W),
+	test_versus(0,0,NB,play_minimax_special(2),play_minimax(2),W,0, D),
 	nl,nl,write("Games won by MinimaxSpecial2 : "),write(W),write("/"),write(NB),nl,
+	nl,nl,write("Games drawn : "),write(D),nl,
 	write(" --- TEST finished --- "),nl,nl,!.
