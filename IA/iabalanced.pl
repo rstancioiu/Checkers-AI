@@ -5,14 +5,27 @@
 :-  module(iabalanced,[play_heuristique/2]).
 :-  use_module(utility).
 
+%Give a score to a single piece based on the player
+piece_score(P,UV1,V1) :-
+	(UV1==0 ->
+		V1 is 0
+		;
+		TMP is UV1 mod 2,
+		(TMP==P ->
+			V1 is 1
+			;
+			V1 is -1
+		)
+	).
+
 %End condition
-sum_connexe(L,SCORE,C,SOMCUR) :-
+sum_connexe(_,L,SCORE,C,SOMCUR) :-
 	C>0,
 	length(L,C),
 	SCORE=SOMCUR.
 
 %Get evaluations
-sum_connexe(L,SCORE,C,SOMCUR) :-
+sum_connexe(PL,L,SCORE,C,SOMCUR) :-
 	board(B),
 	nth0(C, L, P),
 	nth0(0, P, X),
@@ -23,49 +36,47 @@ sum_connexe(L,SCORE,C,SOMCUR) :-
 	Y3 is Y+1,
 	(X>0 ->
 		(Y>0 ->
-			utility:get2D(B,X2,Y2,V1)
+			utility:get2D(B,X2,Y2,UV1),
+			piece_score(PL,UV1,V1)
 			;
-			true,
 			V1 is 0
 		),
 		(Y<9 ->
-			utility:get2D(B,X2,Y3,V2)
+			utility:get2D(B,X2,Y3,UV2),
+			piece_score(PL,UV2,V2)
 			;
-			true,
 			V2 is 0
 		)
 		;
-		true,
 		V1 is 0,
 		V2 is 0
 	),
 	(X<9 ->
 		X3 is X+1,
 		(Y>0 ->
-			utility:get2D(B,X3,Y2,V3)
+			utility:get2D(B,X3,Y2,UV3),
+			piece_score(PL,UV3,V3)
 			;
-			true,
 			V3 is 0
 		),
 		(Y<9 ->
-			utility:get2D(B,X3,Y3,V4)
+			utility:get2D(B,X3,Y3,UV4),
+			piece_score(PL,UV4,V4)
 			;
-			true,
 			V4 is 0
 		)
 		;
-		true,
 		V3 is 0,
 		V4 is 0
 	),
 	INC is V1+V2+V3+V4+SOMCUR,
 	C2 is C+1,
-	sum_connexe(L,SCORE,C2,INC).
+	sum_connexe(PL,L,SCORE,C2,INC).
 
 evaluate(P,B,SCORE) :-
 	findall([X,Y],owned_by(B,P,X,Y),L1),
 	%Chosen method : keep pawns together
-	sum_connexe(L1,SCORE,0,0).
+	sum_connexe(P,L1,SCORE,0,0).
 
 %End condition
 max_score(_,MOVES,MAX,C,FINALMAX) :-
