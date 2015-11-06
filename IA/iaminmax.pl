@@ -141,6 +141,9 @@ play_minimax_special(D,P,MOVE) :-
 	retract(board(_)),
 	assert(board(NEWB)),!.
 
+
+
+
 %End condition
 ia_cmp_alphabeta(_,MOVES,_,_,_,E,MOVECUR,MOVEWIN,_,CURSOR,ECUR,_,_,_,_) :-
 	CURSOR>0,
@@ -186,9 +189,11 @@ ia_cmp_alphabeta(B,MOVES,P,DEPTH,Dinit,E,MOVECUR,MOVEWIN,Pinit,CURSOR,ECUR,GOAL,
 		(ALPHA2<BETA2 ->
 			NEWC is CURSOR+1,
 			ia_cmp_alphabeta(B,MOVES,P,DEPTH,Dinit,E,NEWMOVECUR,MOVEWIN,Pinit,NEWC,NEWWIN,GOAL,EQ1,ALPHA2,BETA2);
-			MOVEWIN=MOVE
+			MOVEWIN=MOVE,
+			E=NEWWIN
 		)
 	).
+
 
 minimax_alphabeta(B,MOV,DEPTH,Dinit,E,P,Pinit,ALPHA,BETA):-
 	(DEPTH==0 ->
@@ -209,6 +214,7 @@ minimax_alphabeta(B,MOV,DEPTH,Dinit,E,P,Pinit,ALPHA,BETA):-
 			true
 		)
 ).
+
 
 play_minimax_alphabeta(D,P,MOVE) :-
 	board(B),

@@ -39,7 +39,7 @@ public class Game implements Runnable {
         else if (player1.equals("IA MiniMaxS"))
             query1 = "play_minimax_special(2,1,MOVE)";
         else if (player1.equals("IA AlphaBeta"))
-            query1 = "play_minimax_alphabeta(7,1,MOVE)";
+            query1 = "play_minimax_alphabeta(6,1,MOVE)";
         if (player2.equals("IA Random"))
             query2 = "play_random(0,MOVE)";
         else if (player2.equals("User"))
@@ -48,8 +48,8 @@ public class Game implements Runnable {
             query2 = "play_minimax(2,0,MOVE)";
         else if (player2.equals("IA MiniMaxS"))
             query2 = "play_minimax_special(2,0,MOVE)";
-        else if (player1.equals("IA AlphaBeta"))
-            query1 = "play_minimax_alphabeta(7,0,MOVE)";
+        else if (player2.equals("IA AlphaBeta"))
+            query2 = "play_minimax_alphabeta(6,0,MOVE)";
     }
 
     public void set_mother(Thread m) {
