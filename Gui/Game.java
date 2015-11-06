@@ -37,10 +37,10 @@ public class Game implements Runnable {
         else if (player1.equals("IA MiniMaxS"))
             query1 = "play_minimax_special(2,1,MOVE)";
         else if (player1.equals("IA AlphaBeta"))
-            query1 = "play_minimax_alphabeta(4,1,MOVE)";
+            query1 = "play_minimax_alphabeta(5,1,MOVE)";
         else if (player1.equals("IA Heuristique"))
             query1 = "play_heuristique(1,MOVE)";
-        
+
         if (player2.equals("IA Random"))
             query2 = "play_random(0,MOVE)";
         else if (player2.equals("User"))
@@ -50,7 +50,7 @@ public class Game implements Runnable {
         else if (player2.equals("IA MiniMaxS"))
             query2 = "play_minimax_special(2,0,MOVE)";
         else if (player2.equals("IA AlphaBeta"))
-            query2 = "play_minimax_alphabeta(4,0,MOVE)";
+            query2 = "play_minimax_alphabeta(5,0,MOVE)";
         else if (player2.equals("IA Heuristique"))
             query2 = "play_heuristique(0,MOVE)";
     }
@@ -129,6 +129,26 @@ public class Game implements Runnable {
         }
         return false;
     }
+
+    private boolean checkDraw(){
+        String draw="check_draw";
+        Query q = new Query(draw);
+        if(q.hasSolution())
+        {
+            System.out.println("We have a draw");
+            for (int i = 0; i < N; ++i) {
+                for (int j = 0; j < N; ++j) {
+                    if (pieces[i][j] != 0)
+                        table[i][j] = 2;
+                    else
+                        table[i][j] = (i + j) % 2;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
 
     private void wait(int waiting) {
         try {
@@ -221,6 +241,11 @@ public class Game implements Runnable {
                     } catch (InterruptedException e) {
                     }
                 }
+            }
+            if(checkDraw())
+            {
+                board.update(pieces, table);
+                break;
             }
             wait(200);
             if (checkWin()) {

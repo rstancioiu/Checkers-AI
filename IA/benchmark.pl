@@ -92,10 +92,10 @@ minmaxspecial_vs_minmax(NB) :-
 
 
 minmaxalphabeta_vs_minmax(NB) :-
-	nl,write(" --- TEST MinMaxAlphaBeta7 VS MinMax2 --- "),nl,
+	nl,write(" --- TEST MinMaxAlphaBeta5 VS MinMax2 --- "),nl,
 	write("Number of games : "),write(NB),nl,nl,
 	write("Progress : "),
-	test_versus(0,0,NB,play_minimax_alphabeta(7),play_minimax(2),W,0, D),
-	nl,nl,write("Games won by MinMaxAlphaBeta7 : "),write(W),write("/"),write(NB),nl,
+	test_versus(0,0,NB,play_minimax_alphabeta(5),play_minimax(2),W,0, D),
+	nl,nl,write("Games won by MinMaxAlphaBeta5 : "),write(W),write("/"),write(NB),nl,
 	nl,nl,write("Games drawn : "),write(D),nl,
 	write(" --- TEST finished --- "),nl,nl,!.
