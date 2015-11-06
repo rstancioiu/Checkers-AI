@@ -21,5 +21,6 @@
 :-  use_module('xuser.pl').
 :-  use_module("iarandom.pl").
 :-  use_module('iaminmax.pl').
+:-  use_module('iabalanced.pl').
 :-  use_module('benchmark.pl').
 :-  use_module('test.pl').

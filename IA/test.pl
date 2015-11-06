@@ -10,7 +10,7 @@
 				 test_paths/0,
 				 test_possible/0,
 				 test_skills/0,
-				 test_check/0,
+				 test_check/0
 	]).
 
 :- use_module(utility).
