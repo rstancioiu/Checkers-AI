@@ -2,19 +2,19 @@
 				Utility module
 ------------------------------------------------  */
 
-:-  module(utility,[init/0,
-				 	game/0,
-				 	board/1,
-				 	make_move/4,
-				 	possible/7,
-				 	select_kills/2,
-				 	check_win/2,
-				 	check_win_player/1,
-				 	check_draw/0,
-				 	owned_by/4,
-				 	pawns_owned_by/4,
-				 	queens_owned_by/4
-					]).
+:- module(utility,[init/0,
+				   game/0,
+				   board/1,
+				   make_move/4,
+				   possible/7,
+				   select_kills/2,
+				   check_win/2,
+				   check_win_player/1,
+				   check_draw/0,
+				   owned_by/4,
+				   pawns_owned_by/4,
+				   queens_owned_by/4
+				   ]).
 
 %Initialize board
 :- dynamic board/1.
@@ -324,4 +324,4 @@ check_draw :-
 	length(L1,LEN1),length(L2,LEN2),length(QL1,LENQ1),length(QL2,LENQ2),
 	((LEN1==1,LEN2==1,LENQ1==1,LENQ2==1);(LEN1==2,LEN2==1,LENQ1==2,LENQ2==1);
 		(LEN1==1,LEN2==2,LENQ1==1,LENQ2==2))
-.
+	.

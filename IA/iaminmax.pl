@@ -21,7 +21,7 @@ evaluate_special(BF,P,E) :-
 	findall([Y],pawns_owned_by(BF,OTHERP,X,Y),L4),
 	findall([X,Y],queens_owned_by(B,OTHERP,X,Y),QL2),
 	findall([X,Y],queens_owned_by(BF,OTHERP,X,Y),QL4),
-	sum(L1,NBPA1),sum(L2,NBPA2),sum(L3,NBPA3),sum(L4,NBPA4),
+	sumlist(L1,NBPA1),sumlist(L2,NBPA2),sumlist(L3,NBPA3),sumlist(L4,NBPA4),
 	length(QL1,NBQ1),length(QL2,NBQ2),length(QL3,NBQ3),length(QL4,NBQ4),
 	((P==0) ->
 		length(L1,LEN1),LEN1_AUX=9*LEN1,NBP1_AUX=LEN1_AUX-NBPA1,NBP1 is NBP1_AUX,
@@ -141,9 +141,6 @@ play_minimax_special(D,P,MOVE) :-
 	retract(board(_)),
 	assert(board(NEWB)),!.
 
-
-
-
 %End condition
 ia_cmp_alphabeta(_,MOVES,_,_,_,E,MOVECUR,MOVEWIN,_,CURSOR,ECUR,_,_,_,_) :-
 	CURSOR>0,
@@ -193,7 +190,6 @@ ia_cmp_alphabeta(B,MOVES,P,DEPTH,Dinit,E,MOVECUR,MOVEWIN,Pinit,CURSOR,ECUR,GOAL,
 		)
 	).
 
-
 minimax_alphabeta(B,MOV,DEPTH,Dinit,E,P,Pinit,ALPHA,BETA):-
 	(DEPTH==0 ->
 		evaluate(B,Pinit,E)
@@ -213,7 +209,6 @@ minimax_alphabeta(B,MOV,DEPTH,Dinit,E,P,Pinit,ALPHA,BETA):-
 			true
 		)
 ).
-
 
 play_minimax_alphabeta(D,P,MOVE) :-
 	board(B),
