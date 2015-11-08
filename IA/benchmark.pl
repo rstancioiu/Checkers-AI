@@ -65,7 +65,7 @@ test_wrapper(SP1,SP2,IA1,IA2,NB) :-
 	write(" --- TEST finished --- "),nl,nl,!.
 
 mega_test() :-
-	%test_wrapper("Random","Random",play_random,play_random,200),
-	%test_wrapper("Heuristique","Random",play_heuristique,play_random,20),
-	%test_wrapper("MinMax","Random",play_minimax(3),play_random,20),
-	%test_wrapper("MinMaxSpecial","Random",play_minimax_special(3),play_random,20),
+	test_wrapper("Random","Random",play_random,play_random,200),
+	test_wrapper("Heuristique","Random",play_heuristique,play_random,20),
+	test_wrapper("MinMax","Random",play_minimax(3),play_random,20),
+	test_wrapper("MinMaxSpecial","Random",play_minimax_special(3),play_random,20).
