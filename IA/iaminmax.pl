@@ -42,6 +42,18 @@ evaluate(B,P,E) :-
 	length(L2,NBOP),
 	E is (NBP+(20-NBOP)).
 
+evaluate_special2(B,P,E) :-
+	findall([X,Y],pawns_owned_by(B,P,X,Y),L1),
+	findall([X,Y],queens_owned_by(B,P,X,Y),L3),
+	OTHERP is 1-P,
+	findall([X,Y],pawns_owned_by(B,OTHERP,X,Y),L2),
+	findall([X,Y],queens_owned_by(B,P,X,Y),L4),
+	length(L1,NBP),
+	length(L2,NBOP),
+	length(L3,NPQP),
+	length(L4,NPQOP),
+	E is ((NBP-NBOP)*2+(NPQP-NPQOP)*5).
+
 max(X,Y,Y) :- X =< Y.
 max(X,Y,X) :- X>Y.
 min(X,Y,Y) :- X >= Y.
@@ -181,25 +193,36 @@ ia_cmp_alphabeta(B,MOVES,P,DEPTH,Dinit,E,MOVECUR,MOVEWIN,Pinit,CURSOR,ECUR,GOAL,
 			NEWMOVECUR=MOVECUR
 		),
 		(call(GOAL,1,0,1) ->
-			ALPHA2 is max(ALPHA,NEWWIN),
-			BETA2 is BETA
+			(ALPHA>NEWWIN ->
+				ALPHA2 is ALPHA;
+				ALPHA2 is NEWWIN
+			),
+			BETA2 is BETA,
+			(ALPHA2<BETA2 ->
+				NEWC is CURSOR+1,
+				ia_cmp_alphabeta(B,MOVES,P,DEPTH,Dinit,E,NEWMOVECUR,MOVEWIN,Pinit,NEWC,NEWWIN,GOAL,EQ1,ALPHA2,BETA2);
+				MOVEWIN=NEWMOVECUR,
+				E is NEWWIN
+			)
 			;
-			BETA2 is min(BETA,NEWWIN),
-			ALPHA2 is ALPHA
-		),
-		(ALPHA2<BETA2 ->
-			NEWC is CURSOR+1,
-			ia_cmp_alphabeta(B,MOVES,P,DEPTH,Dinit,E,NEWMOVECUR,MOVEWIN,Pinit,NEWC,NEWWIN,GOAL,EQ1,ALPHA2,BETA2)
-			;
-			MOVEWIN=NEWMOVECUR,
-			E is NEWWIN
+			(BETA<NEWWIN ->
+				BETA2 is BETA;
+				BETA2 is NEWWIN
+			),
+			ALPHA2 is ALPHA,
+			(ALPHA2>BETA2 ->
+				NEWC is CURSOR+1,
+				ia_cmp_alphabeta(B,MOVES,P,DEPTH,Dinit,E,NEWMOVECUR,MOVEWIN,Pinit,NEWC,NEWWIN,GOAL,EQ1,ALPHA2,BETA2);
+				MOVEWIN=NEWMOVECUR,
+				E is NEWWIN
+			)
 		)
 	).
 
 
 minimax_alphabeta(B,MOV,DEPTH,Dinit,E,P,Pinit,ALPHA,BETA):-
 	(DEPTH==0 ->
-		evaluate(B,Pinit,E)
+		evaluate_special2(B,Pinit,E)
 		;
 		findall([PX,PY,L1,L2],possible(B,P,PX,PY,L1,L2,0),LMOVES),
 		select_kills(LMOVES,NEWMOVES),

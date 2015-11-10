@@ -323,5 +323,6 @@ check_draw :-
 	findall([X,Y],queens_owned_by(B,1,X,Y),QL2),
 	length(L1,LEN1),length(L2,LEN2),length(QL1,LENQ1),length(QL2,LENQ2),
 	((LEN1==1,LEN2==1,LENQ1==1,LENQ2==1);(LEN1==2,LEN2==1,LENQ1==2,LENQ2==1);
-		(LEN1==1,LEN2==2,LENQ1==1,LENQ2==2))
+		(LEN1==1,LEN2==2,LENQ1==1,LENQ2==2);(LEN1==1,LEN2==2,LENQ1==1,LENQ2==1);
+		(LEN1==2,LEN2==1,LENQ1==1,LENQ2==1))
 	.
