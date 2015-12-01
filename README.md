@@ -9,7 +9,8 @@ javac -cp "C:\Program Files\swipl\lib\jpl.jar;." Board.java Game.java Menu.java 
 java -cp "C:\Program Files\swipl\lib\jpl.jar;." Main  
 ```
 
-Would you wish to provide us with some feedback, don't hesitate to contact us at:   
+Would you wish to provide us with some feedback, don't hesitate to contact us at:  
+ > - adrien.juguet@insa-lyon.fr
  > - benoit.chabod@insa-lyon.fr   
  > - hugo.sipahi@hotmail.fr   
  > - mb_vaz@hotmail.com    
